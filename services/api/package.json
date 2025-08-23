@@ -1,0 +1,37 @@
+{
+  "name": "@annonshjälpen/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "prisma": "^5.5.0",
+    "@prisma/client": "^5.5.0",
+    "zod": "^3.22.0",
+    "dotenv": "^16.3.0",
+    "@annonshjälpen/types": "workspace:*",
+    "@annonshjälpen/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.0",
+    "@types/bcryptjs": "^2.4.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^20.8.0",
+    "tsx": "^3.14.0",
+    "typescript": "^5.1.6"
+  }
+}
