@@ -51,6 +51,18 @@ export function OnboardingWizard() {
     }
   }, [draft, initializeDraft]);
 
+  // Auto-advance to step 2 when profile is complete
+  useEffect(() => {
+    console.log('OnboardingWizard: Auto-advance check');
+    console.log('Current step:', currentStep);
+    console.log('Profile complete:', draft?.isProfileComplete);
+    
+    if (draft && currentStep === 1 && draft.isProfileComplete) {
+      console.log('OnboardingWizard: Profile complete, advancing to step 2');
+      nextStep();
+    }
+  }, [draft, currentStep, nextStep]);
+
   if (isLoading || !draft) {
     return (
       <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
@@ -75,7 +87,16 @@ export function OnboardingWizard() {
     disabled: !canProceedToStep(index + 1)
   }));
 
-  const canGoNext = validateCurrentStep();
+  // Custom validation for onboarding (different from campaign wizard)
+  const canGoNext = currentStep === 1 
+    ? draft.isProfileComplete 
+    : Object.values(draft.channels).some(ch => ch.connected);
+  
+  console.log('OnboardingWizard state:');
+  console.log('Current step:', currentStep);
+  console.log('Profile complete:', draft.isProfileComplete);
+  console.log('Channels:', draft.channels);
+  console.log('Can go next:', canGoNext);
   const canGoBack = currentStep > 1;
 
   const handleNext = () => {

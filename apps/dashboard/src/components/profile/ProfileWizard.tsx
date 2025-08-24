@@ -12,7 +12,8 @@ import {
   ArrowRightIcon,
   BookmarkIcon,
   TrashIcon,
-  LinkIcon
+  LinkIcon,
+  CheckBadgeIcon
 } from '@heroicons/react/24/outline';
 
 import { StepCard } from '../wizard/StepCard';
@@ -39,7 +40,8 @@ const PROFILE_STEPS: Step[] = [
   { id: '5', title: 'Mål', completed: false, current: false },
   { id: '6', title: 'Ålder', completed: false, current: false },
   { id: '7', title: 'Intressen', completed: false, current: false },
-  { id: '8', title: 'Beskrivning', completed: false, current: false }
+  { id: '8', title: 'Beskrivning', completed: false, current: false },
+  { id: '9', title: 'Kanaler', completed: false, current: false }
 ];
 
 export function ProfileWizard() {
@@ -51,7 +53,9 @@ export function ProfileWizard() {
     previousProfileStep,
     setProfileSubStep,
     isSaving,
-    initializeDraft
+    initializeDraft,
+    updateChannels,
+    markProfileComplete
   } = useCampaignWizard();
   
   const [validationErrors, setValidationErrors] = React.useState<{ field: string; message: string }[]>([]);
@@ -105,6 +109,8 @@ export function ProfileWizard() {
       case 7: // Interests
         return profile.interests.length > 0;
       case 8: // Description (optional)
+        return true;
+      case 9: // Channel connection (optional for profile completion)
         return true;
       default:
         return false;
@@ -170,7 +176,14 @@ export function ProfileWizard() {
 
   const handleNext = () => {
     if (canGoNext) {
-      nextProfileStep();
+      if (profileSubStep === 9) {
+        // Special handling for final step - mark profile as complete
+        console.log('ProfileWizard: Marking profile as complete');
+        console.log('Current draft:', draft);
+        markProfileComplete();
+      } else {
+        nextProfileStep();
+      }
     }
   };
 
@@ -190,7 +203,7 @@ export function ProfileWizard() {
     const canGoToStep = targetStep <= profileSubStep || 
                         (targetStep === profileSubStep + 1 && validateCurrentProfileStep());
     
-    if (canGoToStep && targetStep <= 8) { // Max 8 steps in profile wizard
+    if (canGoToStep && targetStep <= 9) { // Max 9 steps in profile wizard
       setProfileSubStep(targetStep);
     }
   };
@@ -911,7 +924,7 @@ export function ProfileWizard() {
                 </>
               ) : (
                 <>
-                  <span>{profileSubStep === 8 ? "Slutför profil" : "Nästa"}</span>
+                  <span>{profileSubStep === 9 ? "Slutför profil" : "Nästa"}</span>
                   <ArrowRightIcon className="w-4 h-4" />
                 </>
               )}

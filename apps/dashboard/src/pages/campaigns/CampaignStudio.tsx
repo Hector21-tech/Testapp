@@ -56,10 +56,18 @@ export function CampaignStudio() {
 
   useEffect(() => {
     // Check if onboarding is complete
+    console.log('CampaignStudio: Checking onboarding status');
+    console.log('Draft:', draft);
+    console.log('Profile complete:', draft?.isProfileComplete);
+    console.log('Channels:', draft?.channels);
+    console.log('Any channel connected:', Object.values(draft?.channels || {}).some(ch => ch.connected));
+    
     if (!draft || !draft.isProfileComplete || !Object.values(draft.channels).some(ch => ch.connected)) {
+      console.log('Redirecting to onboarding - requirements not met');
       navigate('/onboarding');
       return;
     }
+    console.log('Onboarding complete, staying in Campaign Studio');
   }, [draft, navigate]);
 
   if (isLoading || !draft) {

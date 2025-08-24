@@ -228,11 +228,8 @@ export const useCampaignWizard = create<CampaignWizardState>()(
 
         nextProfileStep: () => {
           const { profileSubStep } = get();
-          if (profileSubStep < 8) {
+          if (profileSubStep < 9) {
             get().setProfileSubStep(profileSubStep + 1);
-          } else if (profileSubStep === 8) {
-            // Go to channel connection step (step 9) for campaign creation
-            get().setProfileSubStep(9);
           } else {
             get().markProfileComplete();
           }
@@ -384,6 +381,8 @@ function validateProfileSubStep(profile: CompanyProfile, subStep: number): boole
     case 7: // Interests
       return profile.interests.length > 0;
     case 8: // Description (optional)
+      return true;
+    case 9: // Channel connection (optional for profile, but required for campaigns)
       return true;
     default:
       return false;
