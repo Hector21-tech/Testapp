@@ -369,7 +369,7 @@ export const useCampaignWizard = create<CampaignWizardState>()(
 // Helper function to validate profile substeps
 function validateProfileSubStep(profile: CompanyProfile, subStep: number): boolean {
   switch (subStep) {
-    case 1: // Company - now requires both name and org number
+    case 1: // Company - requires both name and org number for billing and security
       return !!profile.companyName && !!profile.orgNumber;
     case 2: // Industry
       return !!profile.industry;

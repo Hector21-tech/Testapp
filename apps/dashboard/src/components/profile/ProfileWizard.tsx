@@ -7,7 +7,11 @@ import {
   FlagIcon as TargetIcon,
   UserGroupIcon,
   HeartIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  BookmarkIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 
 import { StepCard } from '../wizard/StepCard';
@@ -44,12 +48,67 @@ export function ProfileWizard() {
     updateProfile,
     nextProfileStep,
     previousProfileStep,
-    validateCurrentStep,
-    isSaving
+    setProfileSubStep,
+    isSaving,
+    initializeDraft
   } = useCampaignWizard();
   
   const [validationErrors, setValidationErrors] = React.useState<{ field: string; message: string }[]>([]);
   const [validationWarnings, setValidationWarnings] = React.useState<{ field: string; message: string }[]>([]);
+
+  // URL validation helper
+  const validateWebsite = (url: string): { isValid: boolean; warning?: string; suggestion?: string } => {
+    if (!url.trim()) return { isValid: true }; // Empty is OK
+    
+    // Basic URL pattern check
+    const hasProtocol = url.includes('://');
+    const hasDomain = url.includes('.');
+    
+    if (!hasProtocol && !hasDomain) {
+      return { 
+        isValid: true, 
+        warning: 'Kontrollera att detta är rätt webbadress',
+        suggestion: `Menade du: https://www.${url}.se?`
+      };
+    }
+    
+    if (!hasProtocol && hasDomain) {
+      return { 
+        isValid: true, 
+        warning: 'Saknar protokoll (https://)',
+        suggestion: `Förslag: https://${url}`
+      };
+    }
+    
+    return { isValid: true };
+  };
+
+  // Profile-specific validation function
+  const validateCurrentProfileStep = () => {
+    if (!draft) return false;
+    
+    const { profile } = draft;
+    switch (profileSubStep) {
+      case 1: // Company - requires both name and org number
+        return !!profile.companyName && !!profile.orgNumber;
+      case 2: // Industry
+        return !!profile.industry;
+      case 3: // Targeting Areas
+        return profile.targetingAreas?.length > 0;
+      case 4: // Website (optional)
+        return true;
+      case 5: // Goals
+        return profile.goals.length > 0;
+      case 6: // Age range
+        return profile.ageRangeMin > 0 && profile.ageRangeMax > profile.ageRangeMin;
+      case 7: // Interests
+        return profile.interests.length > 0;
+      case 8: // Description (optional)
+        return true;
+      default:
+        return false;
+    }
+  };
 
   // Initialize onboarding integration
   // useOnboardingIntegration();
@@ -77,13 +136,22 @@ export function ProfileWizard() {
   // }, [profile.companyName, profile.orgNumber, profileSubStep]);
   
   // Update steps based on current progress
-  const steps = PROFILE_STEPS.map((step, index) => ({
-    ...step,
-    completed: index < profileSubStep - 1,
-    current: index === profileSubStep - 1
-  }));
+  const steps = PROFILE_STEPS.map((step, index) => {
+    const stepNumber = index + 1;
+    const isCompleted = stepNumber < profileSubStep;
+    const isCurrent = stepNumber === profileSubStep;
+    const canGoToStep = stepNumber <= profileSubStep || 
+                       (stepNumber === profileSubStep + 1 && validateCurrentProfileStep());
+    
+    return {
+      ...step,
+      completed: isCompleted,
+      current: isCurrent,
+      disabled: !canGoToStep
+    };
+  });
 
-  const canGoNext = validateCurrentStep();
+  const canGoNext = validateCurrentProfileStep();
   const canGoBack = profileSubStep > 1;
 
   const handleNext = () => {
@@ -98,10 +166,33 @@ export function ProfileWizard() {
     }
   };
 
+  const handleStepClick = (stepIndex: number) => {
+    const targetStep = stepIndex + 1; // Convert from 0-based index to 1-based step
+    
+    // Allow clicking on:
+    // 1. Completed steps (can go back to any completed step)
+    // 2. Current step (no-op but allowed)
+    // 3. Next step only if current step is valid (can go forward one step)
+    const canGoToStep = targetStep <= profileSubStep || 
+                        (targetStep === profileSubStep + 1 && validateCurrentProfileStep());
+    
+    if (canGoToStep && targetStep <= 8) { // Max 8 steps in profile wizard
+      setProfileSubStep(targetStep);
+    }
+  };
+
   const handleSaveDraft = async () => {
     const { saveDraft } = useCampaignWizard.getState();
     await saveDraft();
     // TODO: Show toast notification
+  };
+
+  const handleReset = () => {
+    if (window.confirm('Är du säker på att du vill nollställa all företagsinformation? Detta går inte att ångra.')) {
+      initializeDraft();
+      setValidationErrors([]);
+      setValidationWarnings([]);
+    }
   };
 
   // Step-specific content
@@ -246,24 +337,52 @@ export function ProfileWizard() {
           </StepCard>
         );
 
-      case 4:
+      case 4: {
+        const websiteValidation = validateWebsite(profile.website || '');
+        
         return (
           <StepCard
             title="Har du en webbplats?"
             description="Vi kan länka till din webbplats i annonserna för att visa mer information."
             icon={<GlobeAltIcon className="w-6 h-6" />}
           >
-            <TextInput
-              label="Webbplats"
-              value={profile.website || ''}
-              onChange={(value) => updateProfile({ website: value })}
-              placeholder="t.ex. www.dittforetag.se (valfritt)"
-              type="url"
-              hint="Lämna tomt om du inte har en webbplats"
-              icon={<GlobeAltIcon className="w-4 h-4" />}
-            />
+            <div className="space-y-4">
+              <TextInput
+                label="Webbplats"
+                value={profile.website || ''}
+                onChange={(value) => updateProfile({ website: value })}
+                placeholder="t.ex. www.dittforetag.se (valfritt)"
+                type="text"
+                hint="Lämna tomt om du inte har en webbplats"
+                icon={<GlobeAltIcon className="w-4 h-4" />}
+              />
+              
+              {/* URL validation feedback */}
+              {websiteValidation.warning && profile.website && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-amber-600">⚠️</span>
+                    <div className="flex-1">
+                      <p className="text-sm text-amber-800 font-medium">{websiteValidation.warning}</p>
+                      {websiteValidation.suggestion && (
+                        <div className="mt-2 flex items-center space-x-2">
+                          <p className="text-sm text-amber-700">{websiteValidation.suggestion}</p>
+                          <button
+                            onClick={() => updateProfile({ website: websiteValidation.suggestion?.split(': ')[1] || websiteValidation.suggestion })}
+                            className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded transition-colors"
+                          >
+                            Använd detta
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </StepCard>
         );
+      }
 
       case 5:
         return (
@@ -716,6 +835,7 @@ export function ProfileWizard() {
             steps={steps} 
             variant="horizontal" 
             showProgress={true}
+            onStepClick={handleStepClick}
           />
         </div>
       </div>
@@ -725,18 +845,66 @@ export function ProfileWizard() {
         {renderStepContent()}
       </div>
 
-      {/* Footer */}
-      <WizardFooter
-        onPrevious={canGoBack ? handlePrevious : undefined}
-        onNext={handleNext}
-        onSaveDraft={handleSaveDraft}
-        previousLabel="Tillbaka"
-        nextLabel={profileSubStep === 8 ? "Slutför profil" : "Nästa"}
-        canGoBack={canGoBack}
-        canProceed={canGoNext}
-        isSaving={isSaving}
-        showSaveDraft={true}
-      />
+      {/* Custom Footer with Reset */}
+      <div className="sticky bottom-0 bg-white border-t border-neutral-200 p-6">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          {/* Left Side - Back Button + Save Draft + Reset */}
+          <div className="flex items-center space-x-4">
+            {canGoBack && (
+              <button
+                onClick={handlePrevious}
+                className="btn-ghost btn-sm flex items-center space-x-2"
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                <span>Tillbaka</span>
+              </button>
+            )}
+            
+            {/* Save Draft */}
+            <button
+              onClick={handleSaveDraft}
+              disabled={isSaving}
+              className="btn-ghost btn-sm flex items-center space-x-2 text-neutral-500 hover:text-brand disabled:opacity-50"
+            >
+              <BookmarkIcon className="w-4 h-4" />
+              <span>{isSaving ? 'Sparar...' : 'Spara utkast'}</span>
+            </button>
+
+            {/* Reset */}
+            <button
+              onClick={handleReset}
+              className="btn-ghost btn-sm flex items-center space-x-2 text-neutral-400 hover:text-red-600 transition-colors"
+            >
+              <TrashIcon className="w-4 h-4" />
+              <span className="text-xs">Rensa allt</span>
+            </button>
+          </div>
+
+          {/* Right Side - Next Button */}
+          <div>
+            <button
+              onClick={handleNext}
+              disabled={!canGoNext || isSaving}
+              className={`
+                btn-primary btn-sm flex items-center space-x-2
+                ${!canGoNext || isSaving ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              {isSaving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Sparar...</span>
+                </>
+              ) : (
+                <>
+                  <span>{profileSubStep === 8 ? "Slutför profil" : "Nästa"}</span>
+                  <ArrowRightIcon className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
