@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Landing Page CSS - From original index.html */
+:root {
+    /* Claude-inspired color palette */
+    --primary-orange: #CC785C;
+    --primary-dark: #8B4513;
+    --accent-beige: #F4EDE4;
+    --text-dark: #1C1C1C;
+    --text-medium: #4A4A4A;
+    --text-light: #757575;
+    --bg-cream: #FDFCFB;
+    --bg-white: #FFFFFF;
+    --border-light: #E5E3E0;
+    --shadow-light: rgba(204, 120, 92, 0.08);
+    --shadow-medium: rgba(204, 120, 92, 0.15);
+    --shadow-strong: rgba(204, 120, 92, 0.25);
+    --glass-bg: rgba(253, 252, 251, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #CC785C 0%, #8B4513 100%);
+    --gradient-text: linear-gradient(135deg, #CC785C 0%, #A0522D 50%, #8B4513 100%);
+    --gradient-bg: linear-gradient(135deg, #FDFCFB 0%, #F4EDE4 100%);
+    --gradient-hero: linear-gradient(135deg, #FDFCFB 0%, #F4EDE4 100%);
+}
+
 @layer base {
   :root {
     --brand-color: #9B4521;

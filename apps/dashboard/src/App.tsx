@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { LandingPage } from './pages/landing/LandingPage';
 import { OnboardingWizard } from './pages/onboarding/OnboardingWizard';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { CampaignStudio } from './pages/campaigns/CampaignStudio';
@@ -15,8 +16,8 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Redirect root to onboarding */}
-          <Route path="/" element={<Navigate to="/onboarding" replace />} />
+          {/* Landing page */}
+          <Route path="/" element={<LandingPage />} />
           
           {/* Onboarding flow */}
           <Route path="/onboarding" element={<OnboardingWizard />} />

@@ -243,8 +243,14 @@ export function OnboardingWizard() {
       <div className="bg-white border-b border-neutral-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="text-center mb-6">
-            <h1 className="heading-xl mb-2">Välkommen till AnnonsHjälpen!</h1>
-            <p className="body text-neutral-600">
+            <button 
+              onClick={() => navigate('/')}
+              className="heading-xl mb-2 hover:opacity-80 transition-opacity cursor-pointer inline-block" 
+              style={{color: '#CC785C'}}
+            >
+              AnnonsHjälpen
+            </button>
+            <p className="body text-neutral-600 mt-2">
               Låt oss sätta upp ditt konto så vi kan hjälpa dig skapa fantastiska annonser
             </p>
           </div>

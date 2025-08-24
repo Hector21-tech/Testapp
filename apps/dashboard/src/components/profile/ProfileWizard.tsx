@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   BuildingOfficeIcon, 
   WrenchScrewdriverIcon, 
@@ -45,6 +46,7 @@ const PROFILE_STEPS: Step[] = [
 ];
 
 export function ProfileWizard() {
+  const navigate = useNavigate();
   const {
     draft,
     profileSubStep,
@@ -852,8 +854,14 @@ export function ProfileWizard() {
       <div className="bg-white border-b border-neutral-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="text-center mb-6">
-            <h1 className="heading-lg mb-2">Skapa din företagsprofil</h1>
-            <p className="body text-neutral-600">
+            <button 
+              onClick={() => navigate('/')}
+              className="heading-lg mb-2 hover:opacity-80 transition-opacity cursor-pointer inline-block" 
+              style={{color: '#CC785C'}}
+            >
+              AnnonsHjälpen
+            </button>
+            <p className="body text-neutral-600 mt-2">
               {profileSubStep} av 9 klart - berätta om ditt företag och koppla kanaler så vi kan skapa perfekta annonser
             </p>
           </div>

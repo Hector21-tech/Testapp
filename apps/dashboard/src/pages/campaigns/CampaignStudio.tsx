@@ -512,8 +512,14 @@ export function CampaignStudio() {
             </button>
             
             <div className="text-center flex-1">
-              <h1 className="heading-lg mb-2">Campaign Studio</h1>
-              <p className="body text-neutral-600">
+              <button 
+                onClick={() => navigate('/')}
+                className="heading-lg mb-2 hover:opacity-80 transition-opacity cursor-pointer inline-block" 
+                style={{color: '#CC785C'}}
+              >
+                AnnonsHjälpen
+              </button>
+              <p className="body text-neutral-600 mt-2">
                 Skapa din annons i 4 enkla steg
               </p>
             </div>
