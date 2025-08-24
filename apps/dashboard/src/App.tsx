@@ -4,6 +4,7 @@ import { OnboardingWizard } from './pages/onboarding/OnboardingWizard';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { CampaignStudio } from './pages/campaigns/CampaignStudio';
 import { NewWizard } from './pages/campaigns/NewWizard';
+import { DesignTestPage } from './pages/design-test/DesignTestPage';
 
 function App() {
   return (
@@ -24,6 +25,9 @@ function App() {
           
           {/* New Campaign Wizard */}
           <Route path="/campaigns/new" element={<NewWizard />} />
+          
+          {/* Design Test Page */}
+          <Route path="/design-test" element={<DesignTestPage />} />
           
           {/* Legacy redirect for old wizard */}
           <Route path="/campaigns/studio" element={<Navigate to="/campaign-studio" replace />} />
