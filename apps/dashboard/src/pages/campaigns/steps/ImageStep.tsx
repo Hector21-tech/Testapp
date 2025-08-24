@@ -1,35 +1,52 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useCampaignWizard } from '../../../features/campaign/store';
-import { AdImagePicker } from '../../../components/AdImagePicker';
+import { CanvaDesignTool, type DesignResult } from '../../../components/design/CanvaDesignTool';
 
 export function ImageStep() {
-  const { draft, updateImage } = useCampaignWizard();
+  const { draft, updateImage, updateContent } = useCampaignWizard();
   
   if (!draft) return null;
+
+  const handleDesignComplete = useCallback((design: DesignResult) => {
+    // Save the design result to wizard state
+    updateImage({
+      url: design.url,
+      thumbnailUrl: design.thumbnailUrl,
+      alt: design.title,
+      source: 'canva',
+      canvaDesign: design
+    });
+  }, [updateImage]);
+
+  // Get AI content if available to pass to Canva
+  const aiContent = draft.content.selectedAIContent ? {
+    headline: draft.content.selectedAIContent.headline,
+    description: draft.content.selectedAIContent.description,
+    cta: draft.content.selectedAIContent.cta
+  } : undefined;
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
         <p className="text-neutral-600">
-          Välj eller ladda upp en bild som representerar ditt företag och tjänster.
+          Skapa professionella annonsbilder med Canva eller välj från bibliotek.
         </p>
       </div>
 
-      <AdImagePicker
-        selectedImage={draft.image}
-        onImageSelect={(image) => updateImage(image)}
-        onImageClear={() => updateImage(null)}
-        industryContext={draft.profile.industry}
-        companyName={draft.profile.companyName}
+      <CanvaDesignTool
+        companyProfile={draft.profile}
+        aiContent={aiContent}
+        onDesignComplete={handleDesignComplete}
+        designType="facebook_ad"
       />
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <h4 className="font-medium text-blue-800 mb-2">Tips för bra annonsbilder</h4>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• Använd högkvalitativa bilder (minst 1200x1200 pixlar)</li>
-          <li>• Välj bilder som visar ditt arbete eller tjänster</li>
-          <li>• Undvik text i bilden - den kan vara svår att läsa</li>
-          <li>• Se till att bilden är relevant för din bransch</li>
+      <div className="bg-white border border-neutral-200 rounded-xl p-4">
+        <h4 className="font-medium text-slate-900 mb-2">Automatisk integration</h4>
+        <ul className="text-sm text-neutral-600 space-y-1">
+          <li>• Branschspecifika templates baserat på ditt företag</li>
+          <li>• AI-innehåll integreras automatiskt i designen</li>
+          <li>• Professionella resultat optimerade för annonser</li>
+          <li>• Export i rätt format för alla plattformar</li>
         </ul>
       </div>
     </div>

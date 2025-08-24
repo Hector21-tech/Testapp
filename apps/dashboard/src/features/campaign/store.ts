@@ -51,8 +51,10 @@ const createEmptyDraft = (): CampaignDraft => ({
     companyName: '',
     orgNumber: '',
     industry: '',
-    location: '',
-    radius: 25,
+    customIndustry: '',
+    targetingAreas: [],
+    customTargetingAreas: [],
+    radius: 0,  // Default to no radius
     website: '',
     goals: [],
     ageRangeMin: 25,
@@ -362,12 +364,12 @@ export const useCampaignWizard = create<CampaignWizardState>()(
 // Helper function to validate profile substeps
 function validateProfileSubStep(profile: CompanyProfile, subStep: number): boolean {
   switch (subStep) {
-    case 1: // Company
-      return !!profile.companyName;
+    case 1: // Company - now requires both name and org number
+      return !!profile.companyName && !!profile.orgNumber;
     case 2: // Industry
       return !!profile.industry;
-    case 3: // Location
-      return !!profile.location;
+    case 3: // Targeting Areas
+      return profile.targetingAreas?.length > 0;
     case 4: // Website (optional)
       return true;
     case 5: // Goals

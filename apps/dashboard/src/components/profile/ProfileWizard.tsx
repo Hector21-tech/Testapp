@@ -14,15 +14,21 @@ import { StepCard } from '../wizard/StepCard';
 import { WizardFooter } from '../wizard/WizardFooter';
 import { Stepper } from '../wizard/Stepper';
 import { TextInput, Select, RadioCards, ChipTags, RangeSlider } from '../fields';
+import { IndustryComboBox } from '../fields/IndustryComboBox';
+import { LocationComboBox } from '../fields/LocationComboBox';
+import { TargetingAreasComboBox } from '../fields/TargetingAreasComboBox';
+import { GoalsComboBox } from '../fields/GoalsComboBox';
 
 import { useCampaignWizard } from '../../features/campaign/store';
 import { INDUSTRIES, BUSINESS_GOALS, TARGET_INTERESTS } from '../../features/campaign/types';
+import { SWEDISH_LOCATIONS } from '../../data/swedishLocations';
+import { validateCompanyInfo, validateSwedishOrgNumber } from '../../utils/validation';
 import type { Step } from '../wizard/Stepper';
 
 const PROFILE_STEPS: Step[] = [
   { id: '1', title: 'Företag', completed: false, current: true },
   { id: '2', title: 'Bransch', completed: false, current: false },
-  { id: '3', title: 'Plats', completed: false, current: false },
+  { id: '3', title: 'Områden', completed: false, current: false },
   { id: '4', title: 'Webb', completed: false, current: false },
   { id: '5', title: 'Mål', completed: false, current: false },
   { id: '6', title: 'Ålder', completed: false, current: false },
@@ -40,10 +46,31 @@ export function ProfileWizard() {
     validateCurrentStep,
     isSaving
   } = useCampaignWizard();
+  
+  const [validationErrors, setValidationErrors] = React.useState<{ field: string; message: string }[]>([]);
+  const [validationWarnings, setValidationWarnings] = React.useState<{ field: string; message: string }[]>([]);
 
   if (!draft) return null;
 
   const { profile } = draft;
+
+  // Temporarily disable validation to debug blank page
+  // React.useEffect(() => {
+  //   try {
+  //     if (profileSubStep === 1 && (profile.companyName || profile.orgNumber)) {
+  //       const validation = validateCompanyInfo(profile.companyName || '', profile.orgNumber || '');
+  //       setValidationErrors(validation.errors);
+  //       setValidationWarnings(validation.warnings);
+  //     } else if (profileSubStep !== 1) {
+  //       setValidationErrors([]);
+  //       setValidationWarnings([]);
+  //     }
+  //   } catch (error) {
+  //     console.error('Validation error:', error);
+  //     setValidationErrors([]);
+  //     setValidationWarnings([]);
+  //   }
+  // }, [profile.companyName, profile.orgNumber, profileSubStep]);
   
   // Update steps based on current progress
   const steps = PROFILE_STEPS.map((step, index) => ({
@@ -77,28 +104,57 @@ export function ProfileWizard() {
   const renderStepContent = () => {
     switch (profileSubStep) {
       case 1:
+        const companyNameError = validationErrors.find(e => e.field === 'companyName');
+        const orgNumberError = validationErrors.find(e => e.field === 'orgNumber');
+        const companyNameWarning = validationWarnings.find(w => w.field === 'companyName');
+        const orgNumberWarning = validationWarnings.find(w => w.field === 'orgNumber');
+
         return (
           <StepCard
-            title="Berätta om ditt företag"
-            description="Detta hjälper oss skapa relevanta annonser för dig."
+            title="Grundläggande information"
+            description="Vi behöver korrekt företagsinformation för fakturering och verifiering."
             icon={<BuildingOfficeIcon className="w-6 h-6" />}
           >
             <div className="space-y-6">
               <TextInput
                 label="Företagsnamn"
                 value={profile.companyName}
-                onChange={(value) => updateProfile({ companyName: value })}
+                onChange={(value) => {
+                  updateProfile({ companyName: value });
+                }}
                 placeholder="t.ex. Johanssons Snickeri AB"
                 required
                 icon={<BuildingOfficeIcon className="w-4 h-4" />}
+                error={companyNameError?.message}
+                hint={companyNameWarning?.message || "Ange företagets officiella namn som det står i företagsregistret"}
               />
               <TextInput
                 label="Organisationsnummer"
                 value={profile.orgNumber || ''}
-                onChange={(value) => updateProfile({ orgNumber: value })}
-                placeholder="t.ex. 556123-4567 (valfritt)"
-                hint="Gör det lättare för kunder att verifiera ditt företag"
+                onChange={(value) => {
+                  // Auto-format org number as user types
+                  const digitsOnly = value.replace(/\D/g, '');
+                  let formatted = value;
+                  if (digitsOnly.length >= 6) {
+                    formatted = `${digitsOnly.slice(0, 6)}-${digitsOnly.slice(6, 10)}`;
+                  }
+                  updateProfile({ orgNumber: formatted });
+                }}
+                placeholder="YYMMDD-XXXX"
+                required
+                icon={<BuildingOfficeIcon className="w-4 h-4" />}
+                error={orgNumberError?.message}
+                hint={orgNumberWarning?.message || "Krävs för fakturering. Format: YYMMDD-XXXX (10 siffror)"}
               />
+
+              {/* Validation Summary */}
+              {validationErrors.length === 0 && profile.companyName && profile.orgNumber && (
+                <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                  <p className="text-sm text-green-700">
+                    ✅ <strong>Företagsinformation validerad</strong> - redo för fakturering
+                  </p>
+                </div>
+              )}
             </div>
           </StepCard>
         );
@@ -110,17 +166,14 @@ export function ProfileWizard() {
             description="Vi använder detta för att skapa branschspecifika annonser."
             icon={<WrenchScrewdriverIcon className="w-6 h-6" />}
           >
-            <RadioCards
-              label="Välj din huvudsakliga bransch"
+            <IndustryComboBox
               value={profile.industry}
-              onChange={(value) => updateProfile({ industry: value })}
-              options={INDUSTRIES.map(industry => ({
-                value: industry.value,
-                label: industry.label,
-                icon: <span className="text-2xl">{industry.icon}</span>
-              }))}
+              customIndustry={profile.customIndustry}
+              onIndustryChange={(industry) => updateProfile({ industry })}
+              onCustomIndustryChange={(customIndustry) => updateProfile({ customIndustry })}
+              placeholder="Sök efter din bransch..."
+              helperText="Skriv några bokstäver för att söka bland hundratals branscher"
               required
-              columns={2}
             />
           </StepCard>
         );
@@ -128,29 +181,60 @@ export function ProfileWizard() {
       case 3:
         return (
           <StepCard
-            title="Var arbetar du?"
-            description="Detta hjälper oss visa dina annonser för rätt geografiska område."
+            title="Vilka områden vill du nå?"
+            description="Välj de städer och orter där du vill visa dina annonser."
             icon={<MapPinIcon className="w-6 h-6" />}
           >
             <div className="space-y-6">
-              <TextInput
-                label="Stad eller ort"
-                value={profile.location}
-                onChange={(value) => updateProfile({ location: value })}
-                placeholder="t.ex. Stockholm, Göteborg, Malmö"
+              <TargetingAreasComboBox
+                value={profile.targetingAreas || []}
+                onChange={(areas) => updateProfile({ targetingAreas: areas })}
+                placeholder="Sök och välj områden..."
+                helperText="Välj de städer och orter där du vill visa dina annonser"
+                maxSelections={10}
                 required
-                icon={<MapPinIcon className="w-4 h-4" />}
               />
-              <RangeSlider
-                label="Arbetsradie"
-                value={profile.radius}
-                onChange={(value) => updateProfile({ radius: value as number })}
-                min={5}
-                max={100}
-                unit="km"
-                hint="Hur långt är du villig att resa för uppdrag?"
-                icon={<MapPinIcon className="w-4 h-4" />}
-              />
+              
+              {/* Radius options - only show if not "Hela Sverige" */}
+              {!(profile.targetingAreas?.length === 1 && profile.targetingAreas[0] === 'Hela Sverige') && (
+                <div className="bg-brand/5 p-4 rounded-xl">
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={profile.radius > 0}
+                      onChange={(e) => updateProfile({ radius: e.target.checked ? 25 : 0 })}
+                      className="w-4 h-4 text-brand border-neutral-300 rounded focus:ring-brand"
+                    />
+                    <span className="text-sm font-medium text-brand-dark">
+                      Inkludera områden runt dessa orter
+                    </span>
+                  </label>
+                  {profile.radius > 0 && (
+                    <div className="mt-4">
+                      <RangeSlider
+                        label="Radie runt valda orter"
+                        value={profile.radius}
+                        onChange={(value) => updateProfile({ radius: value as number })}
+                        min={5}
+                        max={50}
+                        unit="km"
+                        hint="Inkludera närliggande områden inom denna radie"
+                        icon={<MapPinIcon className="w-4 h-4" />}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Info message when "Hela Sverige" is selected */}
+              {profile.targetingAreas?.length === 1 && profile.targetingAreas[0] === 'Hela Sverige' && (
+                <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                  <p className="text-sm text-green-700">
+                    <strong>Perfect!</strong> Med "Hela Sverige" når du alla potentiella kunder i landet. 
+                    Inga ytterligare inställningar behövs.
+                  </p>
+                </div>
+              )}
             </div>
           </StepCard>
         );
@@ -178,22 +262,142 @@ export function ProfileWizard() {
         return (
           <StepCard
             title="Vad är ditt huvudmål?"
-            description="Detta hjälper oss optimera annonserna för bästa resultat."
+            description="Vi anpassar annonstyp, målgrupp och budskap efter ditt specifika mål."
             icon={<TargetIcon className="w-6 h-6" />}
           >
-            <RadioCards
-              label="Välj ditt primära mål med annonserna"
-              value={profile.goals[0] || ''}
-              onChange={(value) => updateProfile({ goals: [value] })}
-              options={BUSINESS_GOALS.map(goal => ({
-                value: goal.value,
-                label: goal.label,
-                description: goal.description,
-                icon: <span className="text-2xl">{goal.icon}</span>
-              }))}
-              required
-              columns={1}
-            />
+            <div className="space-y-6">
+              <GoalsComboBox
+                value={profile.goals[0] || ''}
+                onChange={(value) => updateProfile({ goals: [value] })}
+                placeholder="Sök efter ditt huvudmål..."
+                helperText="Välj det mål som är viktigast för ditt företag just nu"
+                required
+              />
+
+              {/* Additional goal-specific questions */}
+              {profile.goals[0] && (
+                <div className="bg-neutral-50 p-4 rounded-xl">
+                  <h4 className="font-semibold text-neutral-900 mb-3">
+                    Berätta mer om ditt mål
+                  </h4>
+                  
+                  {profile.goals[0] === 'leads' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                          Vad är ett vanligt uppdrag värt för dig?
+                        </label>
+                        <select className="select w-full">
+                          <option value="">Välj prisintervall</option>
+                          <option value="under-5000">Under 5 000 kr</option>
+                          <option value="5000-15000">5 000 - 15 000 kr</option>
+                          <option value="15000-50000">15 000 - 50 000 kr</option>
+                          <option value="over-50000">Över 50 000 kr</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                          Hur många nya uppdrag vill du ha per månad?
+                        </label>
+                        <select className="select w-full">
+                          <option value="">Välj antal</option>
+                          <option value="1-2">1-2 uppdrag</option>
+                          <option value="3-5">3-5 uppdrag</option>
+                          <option value="6-10">6-10 uppdrag</option>
+                          <option value="over-10">Fler än 10 uppdrag</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.goals[0] === 'calls' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                          Vilken typ av samtal föredrar du?
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Akuta uppdrag (samma dag)</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Planerade uppdrag (inom veckan)</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Större projekt (offertförfrågan)</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.goals[0] === 'website' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                          Vad vill du att besökarna ska göra på din webbplats?
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Läsa om mina tjänster</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Se exempel på mitt arbete</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Kontakta mig för offert</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Ladda ner prislista/broschyr</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.goals[0] === 'awareness' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                          Vad vill du bli känd för?
+                        </label>
+                        <textarea 
+                          className="textarea w-full"
+                          placeholder="t.ex. Snabb service, hög kvalitet, miljövänliga lösningar..."
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                          Hur mäter du framgång för kännedomsbyggande?
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Fler som känner till mitt företag</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Fler besökare på sociala medier</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="checkbox" className="mr-2" />
+                            <span className="text-sm">Fler rekommendationer från kunder</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </StepCard>
         );
 
@@ -295,17 +499,29 @@ export function ProfileWizard() {
                   <div>
                     <span className="text-neutral-500">Bransch:</span>
                     <p className="font-medium">
-                      {INDUSTRIES.find(i => i.value === profile.industry)?.label || 'Ej valt'}
+                      {profile.industry === 'other' && profile.customIndustry 
+                        ? profile.customIndustry
+                        : INDUSTRIES.find(i => i.value === profile.industry)?.label || 'Ej valt'
+                      }
                     </p>
                   </div>
                   <div>
-                    <span className="text-neutral-500">Plats:</span>
-                    <p className="font-medium">{profile.location || 'Ej angivet'}</p>
+                    <span className="text-neutral-500">Målområden:</span>
+                    <p className="font-medium">
+                      {profile.targetingAreas?.length > 0 
+                        ? profile.targetingAreas[0] === 'Hela Sverige' 
+                          ? 'Hela Sverige'
+                          : `${profile.targetingAreas.length} områden valda`
+                        : 'Ej angivet'
+                      }
+                    </p>
                   </div>
-                  <div>
-                    <span className="text-neutral-500">Radie:</span>
-                    <p className="font-medium">{profile.radius} km</p>
-                  </div>
+                  {profile.radius > 0 && (
+                    <div>
+                      <span className="text-neutral-500">Radie:</span>
+                      <p className="font-medium">{profile.radius} km runt valda orter</p>
+                    </div>
+                  )}
                   <div>
                     <span className="text-neutral-500">Målgrupp:</span>
                     <p className="font-medium">{profile.ageRangeMin}-{profile.ageRangeMax} år</p>
@@ -331,7 +547,7 @@ export function ProfileWizard() {
       <div className="bg-white border-b border-neutral-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="text-center mb-6">
-            <h1 className="heading-lg mb-2">Företagsprofil</h1>
+            <h1 className="heading-lg mb-2">Skapa din företagsprofil</h1>
             <p className="body text-neutral-600">
               {profileSubStep} av 8 klart - berätta om ditt företag så vi kan skapa perfekta annonser
             </p>

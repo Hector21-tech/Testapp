@@ -1,55 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useCampaignWizard } from '../../../features/campaign/store';
 import { CALL_TO_ACTIONS } from '../../../features/campaign/types';
 import { TextInput } from '../../../components/fields/TextInput';
 import { Select } from '../../../components/fields/Select';
-import { SparklesIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
+import { AIContentGenerator, type AIGeneratedContent } from '../../../components/ai/AIContentGenerator';
+import { SparklesIcon, ClipboardDocumentIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export function ContentStep() {
   const { draft, updateContent } = useCampaignWizard();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mode, setMode] = useState<'manual' | 'ai'>('manual');
+  const [aiContent, setAIContent] = useState<AIGeneratedContent | null>(null);
 
   if (!draft) return null;
 
   const { content } = draft;
 
-  const handleGenerateSuggestions = async () => {
-    setIsGenerating(true);
-    
-    // Mock API call
-    setTimeout(() => {
-      const mockSuggestions = {
-        headlines: [
-          `Professionell ${draft.profile.industry} i ${draft.profile.location}`,
-          `Kvalitet och trygghet - ${draft.profile.companyName}`,
-          `Erfaren ${draft.profile.industry} - Begär offert idag!`
-        ],
-        descriptions: [
-          `Vi på ${draft.profile.companyName} har lång erfarenhet av ${draft.profile.industry.toLowerCase()} i ${draft.profile.location}. Kontakta oss för en kostnadsfri konsultation.`,
-          `Behöver du hjälp med ${draft.profile.industry.toLowerCase()}? Vi erbjuder professionella tjänster i ${draft.profile.location} och omgivning.`,
-          `Välj ${draft.profile.companyName} för ${draft.profile.industry.toLowerCase()}. Vi garanterar kvalitet och kundbemötande i toppklass.`
-        ],
-        ctas: ['Begär offert', 'Kontakta oss', 'Ring nu']
-      };
+  const handleAIContentGenerated = useCallback((generatedContent: AIGeneratedContent) => {
+    setAIContent(generatedContent);
+    // Store the generated content in wizard state for potential use
+    updateContent({ 
+      aiGeneratedContent: generatedContent
+    });
+  }, [updateContent]);
 
-      updateContent({ 
-        generatedSuggestions: mockSuggestions 
-      });
-      setShowSuggestions(true);
-      setIsGenerating(false);
-    }, 2000);
-  };
-
-  const applySuggestion = (type: 'headline' | 'description' | 'cta', suggestion: string) => {
-    if (type === 'headline') {
-      updateContent({ headline: suggestion });
-    } else if (type === 'description') {
-      updateContent({ description: suggestion });
-    } else if (type === 'cta') {
-      updateContent({ callToAction: suggestion });
-    }
-  };
+  const handleAIContentSelected = useCallback((selectedContent: { headline: string; description: string; cta: string }) => {
+    // Apply selected AI content to the wizard
+    updateContent({
+      headline: selectedContent.headline,
+      description: selectedContent.description,
+      callToAction: selectedContent.cta,
+      selectedAIContent: selectedContent
+    });
+  }, [updateContent]);
 
   const ctaOptions = CALL_TO_ACTIONS.map(cta => ({
     value: cta,
@@ -58,109 +40,88 @@ export function ContentStep() {
 
   return (
     <div className="space-y-8">
+      {/* Mode Selection */}
       <div className="text-center">
         <p className="text-neutral-600 mb-6">
           Skapa övertygande annonsinnehåll som lockar kunder att kontakta dig.
         </p>
         
-        <button
-          onClick={handleGenerateSuggestions}
-          disabled={isGenerating}
-          className="btn-secondary flex items-center space-x-2 mx-auto"
-        >
-          <SparklesIcon className="w-4 h-4" />
-          <span>{isGenerating ? 'Genererar förslag...' : 'Generera förslag med AI'}</span>
-        </button>
+        <div className="flex justify-center space-x-4 mb-8">
+          <button
+            onClick={() => setMode('manual')}
+            className={`px-6 py-3 rounded-xl font-medium transition-all ${
+              mode === 'manual' 
+                ? 'bg-brand text-white shadow-soft' 
+                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+            }`}
+          >
+            Skriv själv
+          </button>
+          <button
+            onClick={() => setMode('ai')}
+            className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center space-x-2 ${
+              mode === 'ai' 
+                ? 'bg-brand text-white shadow-soft' 
+                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+            }`}
+          >
+            <SparklesIcon className="w-4 h-4" />
+            <span>AI-assisterad</span>
+          </button>
+        </div>
       </div>
 
-      {showSuggestions && content.generatedSuggestions && (
-        <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6">
-          <h3 className="font-semibold text-brand-800 mb-4 flex items-center">
-            <SparklesIcon className="w-5 h-5 mr-2" />
-            AI-genererade förslag
-          </h3>
-          
-          <div className="space-y-4">
-            {/* Headlines */}
-            <div>
-              <h4 className="text-sm font-medium text-brand-700 mb-2">Rubriker</h4>
-              <div className="space-y-2">
-                {content.generatedSuggestions.headlines.map((headline, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl p-3 cursor-pointer hover:shadow-soft border border-brand-100 hover:border-brand-200 transition-all"
-                    onClick={() => applySuggestion('headline', headline)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">{headline}</span>
-                      <ClipboardDocumentIcon className="w-4 h-4 text-brand-500" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {mode === 'ai' ? (
+        /* AI Content Generator */
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6">
+          <AIContentGenerator
+            companyProfile={draft.profile}
+            onContentGenerated={handleAIContentGenerated}
+            onContentSelect={handleAIContentSelected}
+          />
+        </div>
+      ) : (
+        /* Manual Content Entry */
+        <div className="space-y-6">
+          <TextInput
+            label="Rubrik"
+            placeholder="Skriv en fängslande rubrik..."
+            value={content.headline || ''}
+            onChange={(value) => updateContent({ headline: value })}
+            maxLength={60}
+            showCharCount
+            helperText="Håll rubriken kort och engagerande"
+            required
+          />
 
-            {/* Descriptions */}
-            <div>
-              <h4 className="text-sm font-medium text-brand-700 mb-2">Beskrivningar</h4>
-              <div className="space-y-2">
-                {content.generatedSuggestions.descriptions.map((description, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl p-3 cursor-pointer hover:shadow-soft border border-brand-100 hover:border-brand-200 transition-all"
-                    onClick={() => applySuggestion('description', description)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <span className="text-sm flex-1">{description}</span>
-                      <ClipboardDocumentIcon className="w-4 h-4 text-brand-500 ml-2 mt-0.5 flex-shrink-0" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <TextInput
+            label="Beskrivning"
+            placeholder="Beskriv dina tjänster och vad som gör dig unik..."
+            value={content.description || ''}
+            onChange={(value) => updateContent({ description: value })}
+            multiline
+            rows={4}
+            maxLength={200}
+            showCharCount
+            helperText="Förklara värdet du erbjuder dina kunder"
+            required
+          />
+
+          <Select
+            label="Uppmaning (CTA)"
+            placeholder="Välj vad kunder ska göra"
+            value={content.callToAction || ''}
+            onValueChange={(value) => updateContent({ callToAction: value })}
+            options={ctaOptions}
+            helperText="Detta är knappen som kunder klickar på i din annons"
+            required
+          />
         </div>
       )}
 
-      <div className="space-y-6">
-        <TextInput
-          label="Rubrik"
-          placeholder="Skriv en fängslande rubrik..."
-          value={content.headline}
-          onChange={(value) => updateContent({ headline: value })}
-          maxLength={60}
-          showCharCount
-          helperText="Håll rubriken kort och engagerande"
-          required
-        />
-
-        <TextInput
-          label="Beskrivning"
-          placeholder="Beskriv dina tjänster och vad som gör dig unik..."
-          value={content.description}
-          onChange={(value) => updateContent({ description: value })}
-          multiline
-          rows={4}
-          maxLength={200}
-          showCharCount
-          helperText="Förklara värdet du erbjuder dina kunder"
-          required
-        />
-
-        <Select
-          label="Uppmaning (CTA)"
-          placeholder="Välj vad kunder ska göra"
-          value={content.callToAction}
-          onValueChange={(value) => updateContent({ callToAction: value })}
-          options={ctaOptions}
-          helperText="Detta är knappen som kunder klickar på i din annons"
-          required
-        />
-      </div>
-
       {/* Preview */}
       {(content.headline || content.description || content.callToAction) && (
-        <div className="bg-white border-2 border-neutral-200 rounded-2xl p-6">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6">
           <h3 className="font-semibold text-slate-900 mb-4">Förhandsvisning av annons</h3>
           <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
             {content.headline && (
@@ -181,6 +142,19 @@ export function ContentStep() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Switch to Manual Edit */}
+      {mode === 'ai' && (content.headline || content.description || content.callToAction) && (
+        <div className="text-center">
+          <button
+            onClick={() => setMode('manual')}
+            className="btn-ghost flex items-center space-x-2 mx-auto"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            <span>Redigera manuellt</span>
+          </button>
         </div>
       )}
     </div>

@@ -39,7 +39,7 @@ export function Stepper({
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
                 ${step.completed 
-                  ? 'bg-brand text-white shadow-soft' 
+                  ? 'bg-green-500 text-white shadow-soft' 
                   : step.current
                     ? 'bg-brand text-white shadow-soft animate-pulse-soft'
                     : step.disabled
@@ -48,7 +48,7 @@ export function Stepper({
                 }
               `}>
                 {step.completed ? (
-                  <CheckIcon className="w-4 h-4 animate-bounce-soft" />
+                  <CheckIcon className="w-5 h-5 animate-bounce-soft" />
                 ) : (
                   <span className="text-sm font-semibold">{index + 1}</span>
                 )}
@@ -56,7 +56,7 @@ export function Stepper({
               {index < steps.length - 1 && (
                 <div className={`
                   absolute top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-6
-                  ${step.completed ? 'bg-brand' : 'bg-neutral-200'}
+                  ${step.completed ? 'bg-green-500' : 'bg-neutral-200'}
                   transition-colors duration-200
                 `} />
               )}
@@ -103,52 +103,61 @@ export function Stepper({
       )}
 
       {/* Horizontal Stepper */}
-      <div className="flex items-center justify-between relative">
-        {/* Connecting Line */}
-        <div className="absolute top-4 left-0 right-0 h-0.5 bg-neutral-200">
-          <div 
-            className="h-full bg-brand transition-all duration-500 ease-out"
-            style={{ width: `${(completedSteps / (steps.length - 1)) * 100}%` }}
-          />
+      <div className="relative">
+        {/* Circles Row - Fixed position, independent of text */}
+        <div className="flex items-center justify-between relative mb-6">
+          {/* Connecting Line */}
+          <div className="absolute top-4 left-0 right-0 h-0.5 bg-neutral-200">
+            <div 
+              className="h-full bg-green-500 transition-all duration-500 ease-out"
+              style={{ width: `${(completedSteps / (steps.length - 1)) * 100}%` }}
+            />
+          </div>
+
+          {steps.map((step, index) => (
+            <div key={`circle-${step.id}`} className="relative z-10">
+              <div 
+                className={`
+                  w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
+                  ${step.completed 
+                    ? 'bg-green-500 text-white shadow-soft scale-110' 
+                    : step.current
+                      ? 'bg-brand text-white shadow-soft animate-pulse-soft'
+                      : step.disabled
+                        ? 'bg-neutral-200 text-neutral-400'
+                        : 'bg-white border-2 border-neutral-300 text-neutral-500 hover:border-brand hover:text-brand cursor-pointer'
+                  }
+                `}
+                onClick={() => !step.disabled && onStepClick && onStepClick(index)}
+              >
+                {step.completed ? (
+                  <CheckIcon className="w-5 h-5 animate-bounce-soft" />
+                ) : (
+                  <span className="text-sm font-semibold">{index + 1}</span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {steps.map((step, index) => (
-          <div key={step.id} className="flex flex-col items-center relative z-10">
-            <div 
-              className={`
-                w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 mb-2
-                ${step.completed 
-                  ? 'bg-brand text-white shadow-soft scale-110' 
-                  : step.current
-                    ? 'bg-brand text-white shadow-soft animate-pulse-soft'
-                    : step.disabled
-                      ? 'bg-neutral-200 text-neutral-400'
-                      : 'bg-white border-2 border-neutral-300 text-neutral-500 hover:border-brand hover:text-brand cursor-pointer'
-                }
-              `}
-              onClick={() => !step.disabled && onStepClick && onStepClick(index)}
-            >
-              {step.completed ? (
-                <CheckIcon className="w-4 h-4 animate-bounce-soft" />
-              ) : (
-                <span className="text-sm font-semibold">{index + 1}</span>
-              )}
-            </div>
-            <div className="text-center">
+        {/* Text Row - Completely separate from circles */}
+        <div className="flex items-start justify-between">
+          {steps.map((step, index) => (
+            <div key={`text-${step.id}`} className="text-center flex-1 max-w-20">
               <h3 className={`
-                text-sm font-medium transition-colors duration-200 max-w-20
+                text-sm font-medium transition-colors duration-200 leading-tight
                 ${step.current ? 'text-brand' : step.completed ? 'text-neutral-900' : 'text-neutral-500'}
               `}>
                 {step.title}
               </h3>
               {step.description && (
-                <p className="text-xs text-neutral-500 mt-1 max-w-24">
+                <p className="text-xs text-neutral-500 mt-1 leading-tight">
                   {step.description}
                 </p>
               )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
