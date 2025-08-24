@@ -1,0 +1,48 @@
+﻿# === Builds / outputs ===
+dist/
+**/dist/
+build/
+**/build/
+.next/
+out/
+.vite/
+**/.vite/
+coverage/
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# === Dependencies ===
+node_modules/
+**/node_modules/
+
+# === Editors & OS ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# === Env files ===
+.env
+.env.*
+!.env.example
+
+# === Logs ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === Tooling & caches ===
+.claude/
+.turbo/
+.vercel/
+.netlify/
+.parcel-cache/
+.cache/
+**/.cache/
+
+# === Lockfiles (vi kör pnpm) ===
+!pnpm-lock.yaml
+package-lock.json
+yarn.lock
