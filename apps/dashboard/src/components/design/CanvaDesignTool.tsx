@@ -41,6 +41,11 @@ export interface DesignResult {
 export interface CanvaDesignToolProps {
   companyProfile?: CompanyProfile;
   designType?: 'facebook_ad' | 'instagram_post' | 'google_ad' | 'banner';
+  aiContent?: {
+    headline: string;
+    description: string;
+    cta: string;
+  };
   onDesignComplete: (design: DesignResult) => void;
   onCancel?: () => void;
   className?: string;
@@ -72,6 +77,7 @@ const MOCK_TEMPLATES_BY_INDUSTRY = {
 export function CanvaDesignTool({
   companyProfile,
   designType = 'facebook_ad',
+  aiContent,
   onDesignComplete,
   onCancel,
   className = ''
@@ -114,7 +120,7 @@ export function CanvaDesignTool({
         id: mockDesignId,
         url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&h=630&fit=crop',
         thumbnailUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop',
-        title: `${companyProfile?.companyName || 'Min'} Annons`,
+        title: aiContent ? `${aiContent.headline}` : `${companyProfile?.companyName || 'Min'} Annons`,
         dimensions: { width: 1200, height: 630 },
         format: 'png'
       };
@@ -187,6 +193,30 @@ export function CanvaDesignTool({
             </div>
           )}
 
+          {/* AI Content Preview */}
+          {aiContent && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                <h4 className="font-medium text-green-800">AI-innehåll som kommer användas</h4>
+              </div>
+              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <div className="font-medium text-green-600 mb-1">RUBRIK</div>
+                  <div className="text-green-800">{aiContent.headline}</div>
+                </div>
+                <div>
+                  <div className="font-medium text-green-600 mb-1">BESKRIVNING</div>
+                  <div className="text-green-700">{aiContent.description}</div>
+                </div>
+                <div>
+                  <div className="font-medium text-green-600 mb-1">CTA</div>
+                  <div className="btn-primary btn-xs inline-block">{aiContent.cta}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Template Grid */}
           <div>
             <h3 className="font-semibold text-slate-900 mb-4">
@@ -237,13 +267,29 @@ export function CanvaDesignTool({
                     Förbereder Canva Editor
                   </h3>
                   <p className="text-neutral-600">
-                    Vi laddar din mall med företagsinformation...
+                    Vi laddar din mall med företagsinformation och AI-genererat innehåll...
                   </p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
+              {/* AI Content Integration Status */}
+              {aiContent && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <SparklesIcon className="w-4 h-4 text-blue-600" />
+                    <h4 className="font-medium text-blue-800">🔄 Synkroniserar AI-innehåll</h4>
+                  </div>
+                  <div className="text-sm text-blue-700">
+                    ✅ Rubrik tillagd i design<br/>
+                    ✅ Beskrivning integrerad<br/>
+                    ✅ CTA-knapp uppdaterad<br/>
+                    ✅ Företagsinformation tillagd
+                  </div>
+                </div>
+              )}
+
               {/* Mock Canva Interface */}
               <div className="bg-white rounded-2xl border border-neutral-200 p-6">
                 <div className="flex items-center justify-between mb-4">

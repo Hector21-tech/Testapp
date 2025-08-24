@@ -5,6 +5,8 @@ import { Dashboard } from './pages/dashboard/Dashboard';
 import { CampaignStudio } from './pages/campaigns/CampaignStudio';
 import { NewWizard } from './pages/campaigns/NewWizard';
 import { DesignTestPage } from './pages/design-test/DesignTestPage';
+import { AITestPage } from './pages/ai-test/AITestPage';
+import { ContentStudioTestPage } from './pages/content-studio/ContentStudioTestPage';
 
 function App() {
   return (
@@ -28,6 +30,12 @@ function App() {
           
           {/* Design Test Page */}
           <Route path="/design-test" element={<DesignTestPage />} />
+          
+          {/* AI Test Page */}
+          <Route path="/ai-test" element={<AITestPage />} />
+          
+          {/* Content Studio Test Page - Full Pipeline */}
+          <Route path="/content-studio-test" element={<ContentStudioTestPage />} />
           
           {/* Legacy redirect for old wizard */}
           <Route path="/campaigns/studio" element={<Navigate to="/campaign-studio" replace />} />
