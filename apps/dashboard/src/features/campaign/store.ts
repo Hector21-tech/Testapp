@@ -59,6 +59,7 @@ const createEmptyDraft = (): CampaignDraft => ({
     goals: [],
     ageRangeMin: 25,
     ageRangeMax: 65,
+    targetGender: 'all',
     interests: [],
     description: ''
   },

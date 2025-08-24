@@ -14,10 +14,24 @@ import {
 
 import { useCampaignWizard } from '../../features/campaign/store';
 import { INDUSTRIES } from '../../features/campaign/types';
+// import { useOnboardingStore } from '../../features/onboarding/store';
+// import { OnboardingDashboard } from '../../components/onboarding/OnboardingDashboard';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { draft } = useCampaignWizard();
+  // const { isComplete, getOverallProgress } = useOnboardingStore();
+
+  // Show onboarding if not complete
+  // if (!isComplete) {
+  //   return (
+  //     <div className="min-h-screen bg-neutral-100">
+  //       <div className="container mx-auto px-6 py-8">
+  //         <OnboardingDashboard />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const handleStartCampaign = () => {
     navigate('/campaign-studio');

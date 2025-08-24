@@ -20,9 +20,10 @@ import { TargetingAreasComboBox } from '../fields/TargetingAreasComboBox';
 import { GoalsComboBox } from '../fields/GoalsComboBox';
 
 import { useCampaignWizard } from '../../features/campaign/store';
-import { INDUSTRIES, BUSINESS_GOALS, TARGET_INTERESTS } from '../../features/campaign/types';
+import { INDUSTRIES, BUSINESS_GOALS, TARGET_GENDERS, CUSTOMER_NEEDS_BY_INDUSTRY } from '../../features/campaign/types';
 import { SWEDISH_LOCATIONS } from '../../data/swedishLocations';
 import { validateCompanyInfo, validateSwedishOrgNumber } from '../../utils/validation';
+// import { useOnboardingIntegration } from '../../hooks/useOnboardingIntegration';
 import type { Step } from '../wizard/Stepper';
 
 const PROFILE_STEPS: Step[] = [
@@ -49,6 +50,9 @@ export function ProfileWizard() {
   
   const [validationErrors, setValidationErrors] = React.useState<{ field: string; message: string }[]>([]);
   const [validationWarnings, setValidationWarnings] = React.useState<{ field: string; message: string }[]>([]);
+
+  // Initialize onboarding integration
+  // useOnboardingIntegration();
 
   if (!draft) return null;
 
@@ -169,7 +173,10 @@ export function ProfileWizard() {
             <IndustryComboBox
               value={profile.industry}
               customIndustry={profile.customIndustry}
-              onIndustryChange={(industry) => updateProfile({ industry })}
+              onIndustryChange={(industry) => updateProfile({ 
+                industry, 
+                interests: [] // Clear interests when industry changes
+              })}
               onCustomIndustryChange={(customIndustry) => updateProfile({ customIndustry })}
               placeholder="Sök efter din bransch..."
               helperText="Skriv några bokstäver för att söka bland hundratals branscher"
@@ -404,32 +411,55 @@ export function ProfileWizard() {
       case 6:
         return (
           <StepCard
-            title="Vilken åldersgrupp vill du nå?"
-            description="Berätta vilka kunder som vanligtvis köper dina tjänster."
+            title="Vilken målgrupp vill du nå?"
+            description="Berätta om ålder och kön för de kunder som vanligtvis köper dina tjänster."
             icon={<UserGroupIcon className="w-6 h-6" />}
           >
             <div className="space-y-6">
-              <RangeSlider
-                label="Lägsta ålder"
-                value={profile.ageRangeMin}
-                onChange={(value) => updateProfile({ ageRangeMin: value as number })}
-                min={18}
-                max={75}
-                unit="år"
-                icon={<UserGroupIcon className="w-4 h-4" />}
+              {/* Gender Selection */}
+              <RadioCards
+                label="Kön"
+                value={profile.targetGender || 'all'}
+                onChange={(value) => updateProfile({ targetGender: value })}
+                options={TARGET_GENDERS.map(gender => ({
+                  value: gender.value,
+                  label: gender.label,
+                  description: gender.description,
+                  icon: <span className="text-xl">{gender.icon}</span>
+                }))}
+                required
+                columns={2}
               />
-              <RangeSlider
-                label="Högsta ålder"
-                value={profile.ageRangeMax}
-                onChange={(value) => updateProfile({ ageRangeMax: value as number })}
-                min={profile.ageRangeMin + 1}
-                max={80}
-                unit="år"
-                icon={<UserGroupIcon className="w-4 h-4" />}
-              />
+
+              {/* Age Range */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-neutral-700">Åldersgrupp</h4>
+                <RangeSlider
+                  label="Lägsta ålder"
+                  value={profile.ageRangeMin}
+                  onChange={(value) => updateProfile({ ageRangeMin: value as number })}
+                  min={18}
+                  max={75}
+                  unit="år"
+                  icon={<UserGroupIcon className="w-4 h-4" />}
+                />
+                <RangeSlider
+                  label="Högsta ålder"
+                  value={profile.ageRangeMax}
+                  onChange={(value) => updateProfile({ ageRangeMax: value as number })}
+                  min={profile.ageRangeMin + 1}
+                  max={80}
+                  unit="år"
+                  icon={<UserGroupIcon className="w-4 h-4" />}
+                />
+              </div>
+
+              {/* Summary */}
               <div className="bg-brand/5 p-4 rounded-xl">
                 <p className="text-sm text-brand-dark">
-                  <strong>Målgrupp:</strong> {profile.ageRangeMin}-{profile.ageRangeMax} år
+                  <strong>Målgrupp:</strong> {
+                    TARGET_GENDERS.find(g => g.value === profile.targetGender)?.label || 'Alla kön'
+                  }, {profile.ageRangeMin}-{profile.ageRangeMax} år
                 </p>
               </div>
             </div>
@@ -437,27 +467,52 @@ export function ProfileWizard() {
         );
 
       case 7:
+        // Get industry-specific customer needs
+        const selectedIndustry = profile.industry || 'other';
+        const customerNeeds = CUSTOMER_NEEDS_BY_INDUSTRY[selectedIndustry] || CUSTOMER_NEEDS_BY_INDUSTRY.other;
+        
         return (
           <StepCard
-            title="Vilka intressen har dina kunder?"
-            description="Detta hjälper oss visa annonserna för personer som är intresserade av dina tjänster."
+            title="Vad behöver dina kunder hjälp med?"
+            description="Vi visar dina annonser för personer som söker efter dessa lösningar."
             icon={<HeartIcon className="w-6 h-6" />}
           >
             <ChipTags
-              label="Välj relevanta intressen"
+              label="Välj de behov dina kunder har"
               selectedValues={profile.interests}
               onChange={(values) => updateProfile({ interests: values })}
-              options={TARGET_INTERESTS.map(interest => ({
-                value: interest.value,
-                label: interest.label
+              options={customerNeeds.map(need => ({
+                value: need.value,
+                label: need.label,
+                description: need.description
               }))}
               maxSelections={5}
               allowCustom={true}
-              customPlaceholder="Lägg till annat intresse..."
-              hint="Välj upp till 5 intressen som passar dina kunder bäst"
+              customPlaceholder="Lägg till annat kundbehov..."
+              hint="Välj upp till 5 områden där du hjälper dina kunder"
               icon={<HeartIcon className="w-4 h-4" />}
               required
             />
+
+            {/* Show examples based on industry */}
+            <div className="mt-4 p-4 bg-neutral-50 rounded-xl">
+              <h4 className="text-sm font-semibold text-neutral-700 mb-2">
+                💡 Exempel för din bransch:
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-neutral-600">
+                {customerNeeds.slice(0, 4).map(need => (
+                  <div key={need.value} className="flex items-start space-x-2">
+                    <span className="text-brand">•</span>
+                    <div>
+                      <span className="font-medium">{need.label}</span>
+                      {need.description && (
+                        <div className="text-xs text-neutral-500">{need.description}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </StepCard>
         );
 
@@ -524,7 +579,9 @@ export function ProfileWizard() {
                   )}
                   <div>
                     <span className="text-neutral-500">Målgrupp:</span>
-                    <p className="font-medium">{profile.ageRangeMin}-{profile.ageRangeMax} år</p>
+                    <p className="font-medium">
+                      {TARGET_GENDERS.find(g => g.value === profile.targetGender)?.label || 'Alla kön'}, {profile.ageRangeMin}-{profile.ageRangeMax} år
+                    </p>
                   </div>
                   <div>
                     <span className="text-neutral-500">Intressen:</span>

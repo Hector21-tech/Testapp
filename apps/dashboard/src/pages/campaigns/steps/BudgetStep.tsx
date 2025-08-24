@@ -1,6 +1,5 @@
 import React from 'react';
 import { useCampaignWizard } from '../../../features/campaign/store';
-import { TARGET_INTERESTS } from '../../../features/campaign/types';
 import { TextInput } from '../../../components/fields/TextInput';
 import { ChipTags } from '../../../components/fields/ChipTags';
 import { RangeSlider } from '../../../components/fields/RangeSlider';
@@ -26,10 +25,18 @@ export function BudgetStep() {
     });
   };
 
-  const interestOptions = TARGET_INTERESTS.map(interest => ({
-    value: interest.value,
-    label: interest.label
-  }));
+  const interestOptions = [
+    { value: 'fitness', label: 'Fitness' },
+    { value: 'food', label: 'Mat & Dryck' },
+    { value: 'travel', label: 'Resor' },
+    { value: 'tech', label: 'Teknik' },
+    { value: 'fashion', label: 'Mode' },
+    { value: 'home', label: 'Hem & Trädgård' },
+    { value: 'cars', label: 'Bilar' },
+    { value: 'sports', label: 'Sport' },
+    { value: 'music', label: 'Musik' },
+    { value: 'books', label: 'Böcker' }
+  ];
 
   const calculateEstimatedReach = () => {
     const baseBudget = budget.dailyBudget;
