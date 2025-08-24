@@ -28,6 +28,7 @@ import { ProfileWizard } from '../../components/profile/ProfileWizard';
 // Step components
 import { 
   ChannelStep, 
+  PlatformSelectionStep,
   ContentStep, 
   ImageStep, 
   BudgetStep, 
@@ -36,18 +37,18 @@ import {
 
 const WIZARD_STEPS = [
   {
-    id: 'profile',
-    title: 'Företagsprofil',
-    description: 'Berätta om ditt företag',
+    id: 'setup',
+    title: 'Företagsinformation',
+    description: 'Företagsprofil och kanaler',
     icon: '🏢',
-    component: ProfileWizard
+    component: ProfileWizard  // This will handle both profile AND channels
   },
   {
-    id: 'channels',
-    title: 'Koppla kanaler', 
-    description: 'Välj var du vill annonsera',
+    id: 'platforms',
+    title: 'Välj plattformar',
+    description: 'Var vill du visa annonserna?',
     icon: '📱',
-    component: ChannelStep
+    component: PlatformSelectionStep
   },
   {
     id: 'content',
@@ -90,15 +91,21 @@ export function NewWizard() {
     previousStep,
     validateCurrentStep,
     canProceedToStep,
-    saveDraft
+    saveDraft,
+    setCurrentStep
   } = useCampaignWizard();
 
-  // Initialize draft on mount
+  // Initialize draft on mount and check if user already has completed profile
   useEffect(() => {
     if (!draft) {
       initializeDraft();
+    } else if (draft && draft.isProfileComplete && Object.values(draft.channels).some(ch => ch.connected)) {
+      // User has completed onboarding, start from platform selection (step 2)
+      if (currentStep === 1) {
+        setCurrentStep(2);
+      }
     }
-  }, [draft, initializeDraft]);
+  }, [draft, initializeDraft, currentStep, setCurrentStep]);
 
   // Auto-save draft periodically
   useEffect(() => {
@@ -119,7 +126,16 @@ export function NewWizard() {
     );
   }
 
-  const currentStepData = WIZARD_STEPS[currentStep - 1];
+  // Check if user has completed onboarding to determine which steps to show
+  const hasCompletedOnboarding = draft?.isProfileComplete && Object.values(draft?.channels || {}).some(ch => ch.connected);
+  
+  // Filter steps based on onboarding completion
+  const activeSteps = hasCompletedOnboarding 
+    ? WIZARD_STEPS.slice(1) // Skip step 1 (company setup) if onboarding done
+    : WIZARD_STEPS; // Show all steps if no onboarding
+    
+  const adjustedCurrentStep = hasCompletedOnboarding ? currentStep - 1 : currentStep;
+  const currentStepData = activeSteps[adjustedCurrentStep - 1];
   const CurrentStepComponent = currentStepData?.component;
 
   const handleNext = () => {
@@ -138,7 +154,7 @@ export function NewWizard() {
   };
 
   const canProceed = validateCurrentStep();
-  const progressPercentage = ((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100;
+  const progressPercentage = ((adjustedCurrentStep - 1) / (activeSteps.length - 1)) * 100;
 
   return (
     <div className="min-h-screen bg-neutral-100">
@@ -169,17 +185,17 @@ export function NewWizard() {
           {/* Desktop stepper */}
           <div className="hidden lg:block">
             <Stepper
-              steps={WIZARD_STEPS.map((step, index) => ({
+              steps={activeSteps.map((step, index) => ({
                 id: step.id,
                 title: step.title,
                 description: step.description,
-                completed: index < currentStep - 1,
-                current: index === currentStep - 1,
-                disabled: !canProceedToStep(index + 1)
+                completed: index < adjustedCurrentStep - 1,
+                current: index === adjustedCurrentStep - 1,
+                disabled: false // All visible steps should be accessible
               }))}
-              currentStep={currentStep}
+              currentStep={adjustedCurrentStep}
               onStepClick={(stepIndex) => {
-                const targetStep = stepIndex + 1;
+                const targetStep = hasCompletedOnboarding ? stepIndex + 2 : stepIndex + 1; // Adjust for skipped step 1
                 if (canProceedToStep(targetStep)) {
                   useCampaignWizard.getState().setCurrentStep(targetStep);
                 }
@@ -190,7 +206,7 @@ export function NewWizard() {
           {/* Mobile progress indicator */}
           <div className="lg:hidden">
             <div className="flex items-center justify-between text-sm text-neutral-600">
-              <span>Steg {currentStep} av {WIZARD_STEPS.length}</span>
+              <span>Steg {adjustedCurrentStep} av {activeSteps.length}</span>
               <span>{currentStepData?.title}</span>
             </div>
           </div>
@@ -210,7 +226,13 @@ export function NewWizard() {
             </StepCard>
           ) : (
             <div className="text-center py-12">
-              <p className="text-neutral-600">Steg ej implementerat än</p>
+              <p className="text-neutral-600">Steg {currentStep} ej implementerat än</p>
+              <p className="text-neutral-500 text-sm mt-2">
+                CurrentStepData: {JSON.stringify(currentStepData)}
+              </p>
+              <p className="text-neutral-500 text-sm">
+                Totalt {WIZARD_STEPS.length} steg definierade
+              </p>
             </div>
           )}
         </div>

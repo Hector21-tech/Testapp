@@ -278,6 +278,7 @@ export function ProfileWizard() {
                 onChange={(value) => updateProfile({ goals: [value] })}
                 placeholder="Sök efter ditt huvudmål..."
                 helperText="Välj det mål som är viktigast för ditt företag just nu"
+                industry={profile.industry}
                 required
               />
 
@@ -593,6 +594,107 @@ export function ProfileWizard() {
           </StepCard>
         );
 
+      case 9:
+        // Channel connection step - integrated into ProfileWizard for campaign creation
+        return (
+          <StepCard
+            title="Koppla dina annonskanaler"
+            description="Anslut dina Facebook och Google-konton så kan vi hjälpa dig publicera annonser."
+            icon={<LinkIcon className="w-6 h-6" />}
+          >
+            <div className="space-y-6">
+              {/* Facebook */}
+              <div className="card p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">f</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-neutral-900">Facebook & Instagram</h3>
+                      <p className="text-sm text-neutral-600">
+                        {draft?.channels.facebook.connected 
+                          ? `Ansluten: ${draft.channels.facebook.accountName}`
+                          : 'Koppla ditt Facebook Business Manager-konto'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    {draft?.channels.facebook.connected ? (
+                      <div className="flex items-center space-x-2 text-green-600">
+                        <CheckBadgeIcon className="w-5 h-5" />
+                        <span className="text-sm font-semibold">Ansluten</span>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => updateChannels({
+                          facebook: { connected: true, accountId: 'mock-123', accountName: 'Mock Business Account' }
+                        })}
+                        className="btn-primary btn-sm"
+                      >
+                        Koppla Facebook
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Google */}
+              <div className="card p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">G</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-neutral-900">Google Ads</h3>
+                      <p className="text-sm text-neutral-600">
+                        {draft?.channels.google.connected 
+                          ? `Ansluten: ${draft.channels.google.accountName}`
+                          : 'Koppla ditt Google Ads-konto'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    {draft?.channels.google.connected ? (
+                      <div className="flex items-center space-x-2 text-green-600">
+                        <CheckBadgeIcon className="w-5 h-5" />
+                        <span className="text-sm font-semibold">Ansluten</span>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => updateChannels({
+                          google: { connected: true, accountId: 'mock-456', accountName: 'Mock Google Ads Account' }
+                        })}
+                        className="btn-primary btn-sm"
+                      >
+                        Koppla Google
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Message */}
+              {Object.values(draft?.channels || {}).some(ch => ch.connected) ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                  <p className="text-sm text-green-800">
+                    <strong>Perfekt!</strong> Nu kan vi hjälpa dig skapa annonser på de plattformar du valt.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p className="text-sm text-amber-800">
+                    <strong>Tips:</strong> Du behöver koppla minst en kanal för att kunna skapa kampanjer.
+                  </p>
+                </div>
+              )}
+            </div>
+          </StepCard>
+        );
+
       default:
         return null;
     }
@@ -606,7 +708,7 @@ export function ProfileWizard() {
           <div className="text-center mb-6">
             <h1 className="heading-lg mb-2">Skapa din företagsprofil</h1>
             <p className="body text-neutral-600">
-              {profileSubStep} av 8 klart - berätta om ditt företag så vi kan skapa perfekta annonser
+              {profileSubStep} av 9 klart - berätta om ditt företag och koppla kanaler så vi kan skapa perfekta annonser
             </p>
           </div>
           

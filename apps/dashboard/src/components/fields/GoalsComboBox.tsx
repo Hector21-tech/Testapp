@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { FlagIcon as TargetIcon } from '@heroicons/react/24/outline';
 
-import { CORE_BUSINESS_GOALS, ADVANCED_BUSINESS_GOALS, BUSINESS_GOALS } from '../../features/campaign/types';
+import { CORE_BUSINESS_GOALS, ADVANCED_BUSINESS_GOALS, BUSINESS_GOALS, GOALS_BY_INDUSTRY } from '../../features/campaign/types';
 
 interface GoalsComboBoxProps {
   value: string;
@@ -12,6 +12,7 @@ interface GoalsComboBoxProps {
   required?: boolean;
   error?: string;
   helperText?: string;
+  industry?: string; // Add industry prop for industry-specific goals
 }
 
 export function GoalsComboBox({
@@ -21,7 +22,8 @@ export function GoalsComboBox({
   placeholder = 'Sök efter ditt huvudmål...',
   required = false,
   error,
-  helperText
+  helperText,
+  industry
 }: GoalsComboBoxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,16 +31,23 @@ export function GoalsComboBox({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selectedGoal = BUSINESS_GOALS.find(goal => goal.value === value);
+  // Use industry-specific goals if available, otherwise fallback to generic goals
+  const industryGoals = industry && GOALS_BY_INDUSTRY[industry] ? GOALS_BY_INDUSTRY[industry] : null;
+  const availableGoals = industryGoals || BUSINESS_GOALS;
+  const availableCoreGoals = industryGoals 
+    ? industryGoals.filter(goal => goal.category === 'core')
+    : CORE_BUSINESS_GOALS;
+
+  const selectedGoal = availableGoals.find(goal => goal.value === value);
 
   // Show advanced goals if user searches or if advanced is toggled
   const goalsToShow = searchQuery !== '' || showAdvanced 
-    ? BUSINESS_GOALS 
-    : CORE_BUSINESS_GOALS;
+    ? availableGoals 
+    : availableCoreGoals;
 
   const filteredGoals = searchQuery === ''
     ? goalsToShow
-    : BUSINESS_GOALS.filter((goal) => {
+    : availableGoals.filter((goal) => {
         const searchTerm = searchQuery.toLowerCase();
         return goal.label.toLowerCase().includes(searchTerm) ||
                goal.description.toLowerCase().includes(searchTerm);

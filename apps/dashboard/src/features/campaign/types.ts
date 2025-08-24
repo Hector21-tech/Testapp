@@ -24,16 +24,19 @@ export interface ConnectedChannels {
     connected: boolean;
     accountId?: string;
     accountName?: string;
+    activeForCampaign?: boolean; // Whether this platform is selected for the current campaign
   };
   google: {
     connected: boolean;
     accountId?: string;
     accountName?: string;
+    activeForCampaign?: boolean; // Whether this platform is selected for the current campaign
   };
   instagram: {
     connected: boolean;
     accountId?: string;
     accountName?: string;
+    activeForCampaign?: boolean; // Whether this platform is selected for the current campaign
   };
 }
 
@@ -366,6 +369,230 @@ export const BUSINESS_GOALS = [
   ...CORE_BUSINESS_GOALS,
   ...ADVANCED_BUSINESS_GOALS
 ] as const;
+
+// Industry-specific goals that override the generic ones
+export const GOALS_BY_INDUSTRY: Record<string, Array<{ value: string; label: string; description: string; icon: string; category: string }>> = {
+  // Hantverk & Byggsektorn
+  carpenter: [
+    { value: 'leads', label: 'Fler renoveringsförfrågningar', description: 'Kunder som behöver snickeriarbeten', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler telefonsamtal', description: 'Direktkontakt för akuta reparationer', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tidigare projekt', description: 'Inspirera kunder med dina vackra arbeten', icon: '🔨', category: 'core' },
+    { value: 'bookings', label: 'Fler besiktningar', description: 'Boka in tid för kostnadsfri besiktning', icon: '📅', category: 'advanced' }
+  ],
+
+  electrician: [
+    { value: 'leads', label: 'Fler elförfrågningar', description: 'Kunder med elbehov och installationer', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler akuta ärenden', description: 'Nödsamtal för elstörningar', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa certifieringar', description: 'Bevisa din kompetens och auktorisation', icon: '⚡', category: 'core' },
+    { value: 'bookings', label: 'Fler tidsbeställningar', description: 'Boka installation och service', icon: '📅', category: 'advanced' }
+  ],
+
+  plumber: [
+    { value: 'leads', label: 'Fler VVS-förfrågningar', description: 'Kunder med rörmokeri- och värmebehov', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler akuta läckagesamtal', description: 'Nödsamtal för vattenläckage och stopp', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa referensprojekt', description: 'Badrumsrenoveringar och installationer', icon: '🔧', category: 'core' },
+    { value: 'bookings', label: 'Fler besiktningar', description: 'Kostnadsfri besiktning av VVS-behov', icon: '📅', category: 'advanced' }
+  ],
+
+  // Mat & Dryck
+  restaurant: [
+    { value: 'calls', label: 'Fler bordsbokningar', description: 'Telefonbokningar för middagar', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa menyn', description: 'Locka kunder med läckra rätter', icon: '🍽️', category: 'core' },
+    { value: 'store_visits', label: 'Fler gäster', description: 'Öka antalet besökare till restaurangen', icon: '🏪', category: 'core' },
+    { value: 'bookings', label: 'Onlinebokningar', description: 'Digitala bordsbokningar via webb', icon: '📅', category: 'advanced' },
+    { value: 'downloads', label: 'Ladda ner meny', description: 'PDF-meny och specialerbjudanden', icon: '📄', category: 'advanced' },
+    { value: 'events', label: 'Eventbokningar', description: 'Större sällskap och företagsevent', icon: '🎟️', category: 'advanced' }
+  ],
+
+  cafe: [
+    { value: 'store_visits', label: 'Fler kunder', description: 'Öka antalet besökare till caféet', icon: '🏪', category: 'core' },
+    { value: 'website', label: 'Visa dagens bakelser', description: 'Locka med färska bakverk och kaffe', icon: '☕', category: 'core' },
+    { value: 'calls', label: 'Catering-förfrågningar', description: 'Beställningar för företag och event', icon: '📞', category: 'core' },
+    { value: 'social_engagement', label: 'Fler följare', description: 'Bygg en community runt ditt café', icon: '❤️', category: 'advanced' }
+  ],
+
+  catering: [
+    { value: 'leads', label: 'Fler offertförfrågningar', description: 'Event som behöver catering-tjänster', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler beställningar', description: 'Direktbeställningar för catering', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa menyer', description: 'Inspirera med olika cateringalternativ', icon: '🍱', category: 'core' },
+    { value: 'downloads', label: 'Ladda ner menyer', description: 'PDF-menyer för olika typer av event', icon: '📄', category: 'advanced' }
+  ],
+
+  // Skönhet & Styling
+  hairdresser: [
+    { value: 'bookings', label: 'Fler tidsbokningar', description: 'Online bokning av klipptider', icon: '📅', category: 'core' },
+    { value: 'calls', label: 'Fler telefonbokningar', description: 'Direktbokningar via telefon', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa frisyrer', description: 'Inspirera med före/efter-bilder', icon: '✂️', category: 'core' },
+    { value: 'social_engagement', label: 'Fler följare', description: 'Visa dina vackra frisyrer på sociala medier', icon: '❤️', category: 'advanced' }
+  ],
+
+  beauty_salon: [
+    { value: 'bookings', label: 'Fler behandlingsbokningar', description: 'Boka ansiktsbehandlingar och hudvård', icon: '📅', category: 'core' },
+    { value: 'calls', label: 'Konsultationsbokningar', description: 'Gratis hudkonsultationer', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa behandlingar', description: 'Alla tjänster och priser', icon: '💆‍♀️', category: 'core' },
+    { value: 'newsletter', label: 'Skönhetsnyheter', description: 'Tips och erbjudanden via e-post', icon: '📰', category: 'advanced' }
+  ],
+
+  // Hälsa & Välmående  
+  massage: [
+    { value: 'bookings', label: 'Fler massagebokningar', description: 'Online bokning av massagetider', icon: '📅', category: 'core' },
+    { value: 'calls', label: 'Fler telefonbokningar', description: 'Direktbokningar för akut behov', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa behandlingar', description: 'Olika massagetyper och prislistor', icon: '💆‍♂️', category: 'core' },
+    { value: 'newsletter', label: 'Hälsotips', description: 'Välmåendetips och erbjudanden', icon: '📰', category: 'advanced' }
+  ],
+
+  personal_trainer: [
+    { value: 'leads', label: 'Fler träningsintresserade', description: 'Personer som vill komma i form', icon: '📧', category: 'core' },
+    { value: 'bookings', label: 'Fler PT-bokningar', description: 'Personliga träningstider', icon: '📅', category: 'core' },
+    { value: 'calls', label: 'Fler konsultationer', description: 'Gratis första träningssamtal', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa resultat', description: 'Före/efter-bilder och framgångsstorys', icon: '💪', category: 'core' }
+  ],
+
+  // Transport & Logistik
+  moving: [
+    { value: 'leads', label: 'Fler flyttförfrågningar', description: 'Privatpersoner och företag som ska flytta', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler offertsamtal', description: 'Kostnadsfria hembesök för offert', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tjänster', description: 'Alla flytttjänster och priser', icon: '📦', category: 'core' },
+    { value: 'bookings', label: 'Fler flyttbokningar', description: 'Boka flyttdatum online', icon: '📅', category: 'advanced' }
+  ],
+
+  taxi: [
+    { value: 'calls', label: 'Fler taxibeställningar', description: 'Direktbeställningar via telefon', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa serviceområde', description: 'Var du kör och prisexempel', icon: '🚕', category: 'core' },
+    { value: 'app_installs', label: 'Fler app-användare', description: 'Om du har en beställningsapp', icon: '📱', category: 'advanced' },
+    { value: 'bookings', label: 'Förhandsbeställningar', description: 'Boka taxi i förväg online', icon: '📅', category: 'advanced' }
+  ],
+
+  // Bil & Fordon
+  auto_repair: [
+    { value: 'leads', label: 'Fler reparationsförfrågningar', description: 'Bilägare med reparationsbehov', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler verkstadssamtal', description: 'Akuta problem och service', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tjänster', description: 'Alla reparationer och servicepriser', icon: '🔧', category: 'core' },
+    { value: 'bookings', label: 'Fler servicebokningar', description: 'Boka service och besiktning', icon: '📅', category: 'advanced' }
+  ],
+
+  // Detaljhandel
+  clothing_store: [
+    { value: 'store_visits', label: 'Fler butiksbesök', description: 'Öka antalet kunder i butiken', icon: '🏪', category: 'core' },
+    { value: 'website', label: 'Visa kollektionen', description: 'Locka med nya kläder och trender', icon: '👗', category: 'core' },
+    { value: 'ecommerce', label: 'Fler onlineköp', description: 'Köp kläder online med hemleverans', icon: '🛒', category: 'core' },
+    { value: 'newsletter', label: 'Modeuppdateringar', description: 'Första att veta om nya kollektioner', icon: '📰', category: 'advanced' }
+  ],
+
+  // Konsulttjänster
+  accounting: [
+    { value: 'leads', label: 'Fler redovisningskunder', description: 'Företag som behöver redovisningstjänster', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler konsultationer', description: 'Gratis första rådgivningssamtal', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tjänster', description: 'Alla redovisningstjänster och priser', icon: '📊', category: 'core' },
+    { value: 'bookings', label: 'Fler mötesbokningar', description: 'Boka rådgivningsmöten online', icon: '📅', category: 'advanced' }
+  ],
+
+  legal: [
+    { value: 'leads', label: 'Fler juridiska ärenden', description: 'Klienter som behöver juridisk hjälp', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler konsultationer', description: 'Första juridiska rådgivningen', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa expertområden', description: 'Dina juridiska specialiseringar', icon: '⚖️', category: 'core' },
+    { value: 'bookings', label: 'Fler advokatmöten', description: 'Boka juridiska konsultationer', icon: '📅', category: 'advanced' }
+  ],
+
+  // Fastighet
+  real_estate: [
+    { value: 'leads', label: 'Fler säljuppdrag', description: 'Husägare som vill sälja', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler värderingssamtal', description: 'Gratis hemvärderingar', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa sålda objekt', description: 'Bevisa din framgång med tidigare försäljningar', icon: '🏠', category: 'core' },
+    { value: 'bookings', label: 'Fler visningar', description: 'Boka objektvisningar online', icon: '📅', category: 'advanced' }
+  ],
+
+  // Utbildning
+  driving_school: [
+    { value: 'leads', label: 'Fler körkortsaspiranter', description: 'Personer som vill ta körkort', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler kursintresserade', description: 'Direktkontakt för kursinfo', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa kurser', description: 'Alla körkortskurser och priser', icon: '🚗', category: 'core' },
+    { value: 'bookings', label: 'Fler körningslektioner', description: 'Boka körlektioner online', icon: '📅', category: 'advanced' }
+  ],
+
+  music_teacher: [
+    { value: 'leads', label: 'Fler musikelever', description: 'Barn och vuxna som vill lära sig musik', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler provlektioner', description: 'Gratis första musiklektion', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa instrument', description: 'Vilka instrument du undervisar i', icon: '🎵', category: 'core' },
+    { value: 'bookings', label: 'Fler lektionsbokningar', description: 'Boka musiklektioner online', icon: '📅', category: 'advanced' }
+  ],
+
+  // Teknik & IT
+  web_design: [
+    { value: 'leads', label: 'Fler webbprojekt', description: 'Företag som behöver nya webbsidor', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler konsultationer', description: 'Diskutera webbprojekt och idéer', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa portfolio', description: 'Imponera med dina bästa webbdesigns', icon: '💻', category: 'core' },
+    { value: 'bookings', label: 'Fler projektmöten', description: 'Boka designkonsultationer', icon: '📅', category: 'advanced' }
+  ],
+
+  it_support: [
+    { value: 'leads', label: 'Fler IT-problem', description: 'Företag med datorproblem', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler akuta supportsamtal', description: 'Nödhjälp för IT-kriser', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tjänster', description: 'Alla IT-tjänster och supportområden', icon: '🖥️', category: 'core' },
+    { value: 'bookings', label: 'Fler servicebokningar', description: 'Schemalagd IT-service', icon: '📅', category: 'advanced' }
+  ],
+
+  // Husdjur & Djurvård
+  dog_grooming: [
+    { value: 'bookings', label: 'Fler trimmingsbokningar', description: 'Boka hundtrimning online', icon: '📅', category: 'core' },
+    { value: 'calls', label: 'Fler hunägare', description: 'Kontakt från hundägare', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa före/efter', description: 'Imponera med vackra trimningsresultat', icon: '🐕', category: 'core' },
+    { value: 'social_engagement', label: 'Fler följare', description: 'Visa söta hundar på sociala medier', icon: '❤️', category: 'advanced' }
+  ],
+
+  pet_sitting: [
+    { value: 'leads', label: 'Fler djurägare', description: 'Familjer som behöver djurpassning', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler passningsförfrågningar', description: 'Direktkontakt för akut passning', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa referenser', description: 'Nöjda djurägare och deras kommentarer', icon: '🐾', category: 'core' },
+    { value: 'bookings', label: 'Fler passningsbokningar', description: 'Boka djurpassning i förväg', icon: '📅', category: 'advanced' }
+  ],
+
+  // Foto & Video
+  photographer: [
+    { value: 'leads', label: 'Fler fotouppdrag', description: 'Bröllop, företag och privatpersoner', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler konsultationer', description: 'Diskutera fotoidéer och planering', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa portfolio', description: 'Imponera med dina bästa fotografier', icon: '📸', category: 'core' },
+    { value: 'bookings', label: 'Fler fotobokningar', description: 'Boka fotografering online', icon: '📅', category: 'advanced' }
+  ],
+
+  // Event & Underhållning
+  dj: [
+    { value: 'leads', label: 'Fler eventförfrågningar', description: 'Bröllop, fester och företagsevent', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler konsultationer', description: 'Diskutera musik och eventplanering', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa erfarenhet', description: 'Videos från tidigare event och referenser', icon: '🎵', category: 'core' },
+    { value: 'bookings', label: 'Fler eventbokningar', description: 'Boka DJ-tjänster online', icon: '📅', category: 'advanced' }
+  ],
+
+  event_planning: [
+    { value: 'leads', label: 'Fler eventprojekt', description: 'Bröllop, företagsevent och fester', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler planeringskonsultationer', description: 'Gratis första planeringsmöte', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tidigare event', description: 'Inspirera med vackra event du planerat', icon: '🎉', category: 'core' },
+    { value: 'bookings', label: 'Fler konsultationer', description: 'Boka eventplaneringsmöten', icon: '📅', category: 'advanced' }
+  ],
+
+  // Service
+  cleaning: [
+    { value: 'leads', label: 'Fler städkunder', description: 'Hem och företag som behöver städning', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler städförfrågningar', description: 'Akuta städbehov och återkommande', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa tjänster', description: 'Alla städtjänster och prisexempel', icon: '🧹', category: 'core' },
+    { value: 'bookings', label: 'Fler städbokningar', description: 'Boka städning online', icon: '📅', category: 'advanced' }
+  ],
+
+  appliance_repair: [
+    { value: 'leads', label: 'Fler reparationsärenden', description: 'Trasiga vitvaror och apparater', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler akuta reparationer', description: 'Nödhjälp när apparater slutar fungera', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa expertis', description: 'Vilka märken och apparater du reparerar', icon: '🔧', category: 'core' },
+    { value: 'bookings', label: 'Fler servicebokningar', description: 'Boka reparationstid hemma', icon: '📅', category: 'advanced' }
+  ],
+
+  // Fallback for industries not yet defined
+  other: [
+    { value: 'leads', label: 'Fler kundförfrågningar', description: 'Kontakter som vill ha dina tjänster', icon: '📧', category: 'core' },
+    { value: 'calls', label: 'Fler telefonsamtal', description: 'Direktkontakt från intresserade kunder', icon: '📞', category: 'core' },
+    { value: 'website', label: 'Visa ditt arbete', description: 'Imponera med exempel på dina tjänster', icon: '🌐', category: 'core' },
+    { value: 'awareness', label: 'Ökad kännedom', description: 'Bli mer känd i ditt område', icon: '👥', category: 'core' }
+  ]
+};
 
 // Industry-specific customer needs
 export const CUSTOMER_NEEDS_BY_INDUSTRY: Record<string, Array<{ value: string; label: string; description?: string }>> = {

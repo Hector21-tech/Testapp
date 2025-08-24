@@ -230,6 +230,9 @@ export const useCampaignWizard = create<CampaignWizardState>()(
           const { profileSubStep } = get();
           if (profileSubStep < 8) {
             get().setProfileSubStep(profileSubStep + 1);
+          } else if (profileSubStep === 8) {
+            // Go to channel connection step (step 9) for campaign creation
+            get().setProfileSubStep(9);
           } else {
             get().markProfileComplete();
           }
@@ -249,7 +252,7 @@ export const useCampaignWizard = create<CampaignWizardState>()(
           set({
             draft: { ...draft, isProfileComplete: true },
             currentStep: 2,
-            profileSubStep: 8
+            profileSubStep: 9  // Keep at step 9 to show completed state
           });
         },
 
@@ -292,10 +295,11 @@ export const useCampaignWizard = create<CampaignWizardState>()(
           
           // For 6-step campaign wizard
           switch (currentStep) {
-            case 1: // Profile - validate current substep or if completed
-              return draft.isProfileComplete || validateProfileSubStep(draft.profile, profileSubStep);
-            case 2: // Channels - require at least one connected channel
-              return Object.values(draft.channels).some(channel => channel.connected);
+            case 1: // Company Setup - validate profile completed AND at least one channel connected
+              return (draft.isProfileComplete || validateProfileSubStep(draft.profile, profileSubStep)) && 
+                     Object.values(draft.channels).some(channel => channel.connected);
+            case 2: // Platform Selection - require at least one platform selected for campaign
+              return Object.values(draft.channels).some(channel => channel.activeForCampaign);
             case 3: // Content - require headline, description, and CTA
               return !!(draft.content.headline && draft.content.description && draft.content.callToAction);
             case 4: // Image - optional but let's require it for completeness
@@ -319,11 +323,11 @@ export const useCampaignWizard = create<CampaignWizardState>()(
           // For 6-step campaign wizard:
           if (step <= 1) return true;
           
-          // Step 2 (Channels) requires completed profile
-          if (step === 2) return draft.isProfileComplete;
+          // Step 2 (Platform Selection) requires completed profile AND connected channels
+          if (step === 2) return draft.isProfileComplete && Object.values(draft.channels).some(channel => channel.connected);
           
-          // Step 3 (Content) requires at least one connected channel
-          if (step === 3) return Object.values(draft.channels).some(channel => channel.connected);
+          // Step 3 (Content) requires at least one platform selected for campaign
+          if (step === 3) return Object.values(draft.channels).some(channel => channel.activeForCampaign);
           
           // Step 4 (Image) requires content to be filled
           if (step === 4) return !!(draft.content.headline && draft.content.description && draft.content.callToAction);
