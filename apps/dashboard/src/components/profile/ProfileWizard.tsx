@@ -11,7 +11,8 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   BookmarkIcon,
-  TrashIcon
+  TrashIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline';
 
 import { StepCard } from '../wizard/StepCard';
@@ -110,10 +111,23 @@ export function ProfileWizard() {
     }
   };
 
+  // Initialize draft on mount
+  React.useEffect(() => {
+    if (!draft) {
+      initializeDraft();
+    }
+  }, [draft, initializeDraft]);
+
   // Initialize onboarding integration
   // useOnboardingIntegration();
 
-  if (!draft) return null;
+  if (!draft) {
+    return (
+      <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+      </div>
+    );
+  }
 
   const { profile } = draft;
 
