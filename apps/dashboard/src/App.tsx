@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { OnboardingWizard } from './pages/onboarding/OnboardingWizard';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { CampaignStudio } from './pages/campaigns/CampaignStudio';
+import { NewWizard } from './pages/campaigns/NewWizard';
 
 function App() {
   return (
@@ -21,8 +22,11 @@ function App() {
           {/* Campaign creation */}
           <Route path="/campaign-studio" element={<CampaignStudio />} />
           
-          {/* Legacy redirect */}
-          <Route path="/campaigns/new" element={<Navigate to="/onboarding" replace />} />
+          {/* New Campaign Wizard */}
+          <Route path="/campaigns/new" element={<NewWizard />} />
+          
+          {/* Legacy redirect for old wizard */}
+          <Route path="/campaigns/studio" element={<Navigate to="/campaign-studio" replace />} />
         </Routes>
       </div>
     </Router>

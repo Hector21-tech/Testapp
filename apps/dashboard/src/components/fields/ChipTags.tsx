@@ -9,12 +9,14 @@ export interface ChipOption {
 
 export interface ChipTagsProps {
   label: string;
-  selectedValues: string[];
+  selectedValues?: string[];
+  selectedIds?: string[];
   onChange: (values: string[]) => void;
   options: ChipOption[];
   required?: boolean;
   error?: string;
   hint?: string;
+  helperText?: string;
   icon?: React.ReactNode;
   maxSelections?: number;
   allowCustom?: boolean;
@@ -25,11 +27,13 @@ export interface ChipTagsProps {
 export function ChipTags({
   label,
   selectedValues,
+  selectedIds,
   onChange,
   options,
   required = false,
   error,
   hint,
+  helperText,
   icon,
   maxSelections,
   allowCustom = false,
@@ -39,17 +43,20 @@ export function ChipTags({
   const [customInput, setCustomInput] = React.useState('');
   const fieldId = `chipTags-${label.toLowerCase().replace(/\s+/g, '-')}`;
   
+  // Use selectedIds or selectedValues 
+  const selected = selectedIds || selectedValues || [];
+  
   const toggleSelection = (value: string) => {
-    if (selectedValues.includes(value)) {
-      onChange(selectedValues.filter(v => v !== value));
-    } else if (!maxSelections || selectedValues.length < maxSelections) {
-      onChange([...selectedValues, value]);
+    if (selected.includes(value)) {
+      onChange(selected.filter(v => v !== value));
+    } else if (!maxSelections || selected.length < maxSelections) {
+      onChange([...selected, value]);
     }
   };
 
   const addCustomTag = () => {
-    if (customInput.trim() && !selectedValues.includes(customInput.trim())) {
-      onChange([...selectedValues, customInput.trim()]);
+    if (customInput.trim() && !selected.includes(customInput.trim())) {
+      onChange([...selected, customInput.trim()]);
       setCustomInput('');
     }
   };
@@ -62,10 +69,10 @@ export function ChipTags({
   };
 
   const removeTag = (value: string) => {
-    onChange(selectedValues.filter(v => v !== value));
+    onChange(selected.filter(v => v !== value));
   };
 
-  const canAddMore = !maxSelections || selectedValues.length < maxSelections;
+  const canAddMore = !maxSelections || selected.length < maxSelections;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -78,15 +85,15 @@ export function ChipTags({
         {required && <span className="text-red-500 ml-1">*</span>}
         {maxSelections && (
           <span className="text-xs text-neutral-500 ml-2">
-            ({selectedValues.length}/{maxSelections})
+            ({selected.length}/{maxSelections})
           </span>
         )}
       </label>
       
       {/* Selected Tags */}
-      {selectedValues.length > 0 && (
+      {selected.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {selectedValues.map((value) => {
+          {selected.map((value) => {
             const isCustom = !options.find(opt => opt.value === value);
             return (
               <span
@@ -116,7 +123,7 @@ export function ChipTags({
       {/* Available Options */}
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
-          const isSelected = selectedValues.includes(option.value);
+          const isSelected = selected.includes(option.value);
           const isDisabled = option.disabled || (isSelected ? false : !canAddMore);
           
           return (
@@ -169,9 +176,9 @@ export function ChipTags({
         </p>
       )}
       
-      {hint && !error && (
+      {(hint || helperText) && !error && (
         <p className="text-sm text-neutral-500">
-          {hint}
+          {hint || helperText}
         </p>
       )}
     </div>

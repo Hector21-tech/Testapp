@@ -211,7 +211,7 @@ export const useCampaignWizard = create<CampaignWizardState>()(
 
         nextStep: () => {
           const { currentStep } = get();
-          if (currentStep < 6) {
+          if (currentStep < 6 && get().canProceedToStep(currentStep + 1)) {
             get().setCurrentStep(currentStep + 1);
           }
         },
@@ -287,12 +287,23 @@ export const useCampaignWizard = create<CampaignWizardState>()(
           const { draft, currentStep, profileSubStep } = get();
           if (!draft) return false;
           
-          // For onboarding wizard (only 2 steps)
+          // For 6-step campaign wizard
           switch (currentStep) {
-            case 1: // Profile - validate current substep
-              return validateProfileSubStep(draft.profile, profileSubStep);
+            case 1: // Profile - validate current substep or if completed
+              return draft.isProfileComplete || validateProfileSubStep(draft.profile, profileSubStep);
             case 2: // Channels - require at least one connected channel
               return Object.values(draft.channels).some(channel => channel.connected);
+            case 3: // Content - require headline, description, and CTA
+              return !!(draft.content.headline && draft.content.description && draft.content.callToAction);
+            case 4: // Image - optional but let's require it for completeness
+              return !!draft.image;
+            case 5: // Budget - validate budget and dates
+              return draft.budget.dailyBudget >= 50 && 
+                     !!draft.budget.startDate && 
+                     !!draft.budget.endDate &&
+                     new Date(draft.budget.endDate) > new Date(draft.budget.startDate);
+            case 6: // Review - always valid (user just reviews)
+              return true;
             default:
               return false;
           }
@@ -302,15 +313,28 @@ export const useCampaignWizard = create<CampaignWizardState>()(
           const { draft } = get();
           if (!draft) return false;
           
-          // For onboarding wizard (2 steps):
-          // Step 1 (Profile) is always accessible
+          // For 6-step campaign wizard:
           if (step <= 1) return true;
           
           // Step 2 (Channels) requires completed profile
           if (step === 2) return draft.isProfileComplete;
           
-          // For campaign studio - user should be redirected if onboarding not complete
-          return true;
+          // Step 3 (Content) requires at least one connected channel
+          if (step === 3) return Object.values(draft.channels).some(channel => channel.connected);
+          
+          // Step 4 (Image) requires content to be filled
+          if (step === 4) return !!(draft.content.headline && draft.content.description && draft.content.callToAction);
+          
+          // Step 5 (Budget) requires image
+          if (step === 5) return !!draft.image;
+          
+          // Step 6 (Review) requires valid budget
+          if (step === 6) return draft.budget.dailyBudget >= 50 && 
+                                 !!draft.budget.startDate && 
+                                 !!draft.budget.endDate &&
+                                 new Date(draft.budget.endDate) > new Date(draft.budget.startDate);
+          
+          return false;
         },
 
         reset: () => {

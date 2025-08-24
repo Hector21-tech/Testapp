@@ -278,7 +278,7 @@ export function CampaignStudio() {
                 <RangeSlider
                   label="Daglig budget"
                   value={draft.budget.dailyBudget}
-                  onChange={(value) => updateBudget({ dailyBudget: value })}
+                  onChange={(value) => updateBudget({ dailyBudget: value as number })}
                   min={50}
                   max={1000}
                   step={25}
@@ -333,7 +333,7 @@ export function CampaignStudio() {
                     label="Lägsta ålder"
                     value={draft.budget.targeting.ageMin}
                     onChange={(value) => updateBudget({ 
-                      targeting: { ...draft.budget.targeting, ageMin: value }
+                      targeting: { ...draft.budget.targeting, ageMin: value as number }
                     })}
                     min={18}
                     max={75}
@@ -345,7 +345,7 @@ export function CampaignStudio() {
                     label="Högsta ålder"
                     value={draft.budget.targeting.ageMax}
                     onChange={(value) => updateBudget({ 
-                      targeting: { ...draft.budget.targeting, ageMax: value }
+                      targeting: { ...draft.budget.targeting, ageMax: value as number }
                     })}
                     min={draft.budget.targeting.ageMin + 1}
                     max={80}
@@ -534,8 +534,8 @@ export function CampaignStudio() {
         previousLabel="Tillbaka"
         nextLabel={currentStep === 4 ? "🚀 Starta kampanj" : "Nästa"}
         canGoBack={currentStep > 1}
-        canGoNext={canGoNext()}
-        isNextLoading={isSaving}
+        canProceed={canGoNext()}
+        isSaving={isSaving}
         showSaveDraft={currentStep < 4}
       />
     </div>

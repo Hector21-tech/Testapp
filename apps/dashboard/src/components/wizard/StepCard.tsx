@@ -3,7 +3,7 @@ import React from 'react';
 export interface StepCardProps {
   title: string;
   description?: string;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | string;
   children: React.ReactNode;
   className?: string;
   animate?: boolean;
@@ -28,7 +28,11 @@ export function StepCard({
         {icon && (
           <div className="flex justify-center mb-4">
             <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center text-brand">
-              {icon}
+              {typeof icon === 'string' ? (
+                <span className="text-2xl">{icon}</span>
+              ) : (
+                icon
+              )}
             </div>
           </div>
         )}

@@ -9,10 +9,17 @@ export interface TextInputProps {
   required?: boolean;
   error?: string;
   hint?: string;
-  type?: 'text' | 'email' | 'tel' | 'url' | 'date';
+  helperText?: string;
+  type?: 'text' | 'email' | 'tel' | 'url' | 'date' | 'number';
   icon?: React.ReactNode;
   disabled?: boolean;
   className?: string;
+  multiline?: boolean;
+  rows?: number;
+  maxLength?: number;
+  showCharCount?: boolean;
+  min?: string | number;
+  max?: string | number;
 }
 
 export function TextInput({
@@ -23,10 +30,17 @@ export function TextInput({
   required = false,
   error,
   hint,
+  helperText,
   type = 'text',
   icon,
   disabled = false,
-  className = ''
+  className = '',
+  multiline = false,
+  rows = 3,
+  maxLength,
+  showCharCount = false,
+  min,
+  max
 }: TextInputProps) {
   const inputId = `input-${label.toLowerCase().replace(/\s+/g, '-')}`;
   
@@ -42,24 +56,52 @@ export function TextInput({
       </label>
       
       <div className="relative">
-        <input
-          id={inputId}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          disabled={disabled}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={`
-            input
-            ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}
-            ${disabled ? 'bg-neutral-100 cursor-not-allowed' : ''}
-          `}
-        />
+        {multiline ? (
+          <textarea
+            id={inputId}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            disabled={disabled}
+            rows={rows}
+            maxLength={maxLength}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : (hint || helperText) ? `${inputId}-hint` : undefined}
+            className={`
+              textarea
+              ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}
+              ${disabled ? 'bg-neutral-100 cursor-not-allowed' : ''}
+            `}
+          />
+        ) : (
+          <input
+            id={inputId}
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            disabled={disabled}
+            maxLength={maxLength}
+            min={min}
+            max={max}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : (hint || helperText) ? `${inputId}-hint` : undefined}
+            className={`
+              input
+              ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}
+              ${disabled ? 'bg-neutral-100 cursor-not-allowed' : ''}
+            `}
+          />
+        )}
+        
+        {showCharCount && maxLength && (
+          <div className="absolute bottom-2 right-3 text-xs text-neutral-500">
+            {value.length}/{maxLength}
+          </div>
+        )}
         
         {error && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <div className="absolute top-3 right-3 flex items-center pointer-events-none">
             <ExclamationCircleIcon className="h-5 w-5 text-red-400" />
           </div>
         )}
@@ -72,9 +114,9 @@ export function TextInput({
         </p>
       )}
       
-      {hint && !error && (
+      {(hint || helperText) && !error && (
         <p id={`${inputId}-hint`} className="text-sm text-neutral-500">
-          {hint}
+          {hint || helperText}
         </p>
       )}
     </div>

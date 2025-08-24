@@ -7,10 +7,15 @@ export interface WizardFooterProps {
   onSaveDraft?: () => void;
   previousLabel?: string;
   nextLabel?: string;
+  nextButtonText?: string;
   canGoBack?: boolean;
-  canGoNext?: boolean;
-  isNextLoading?: boolean;
+  canProceed?: boolean;
+  isFirstStep?: boolean;
+  isLastStep?: boolean;
+  isSaving?: boolean;
   showSaveDraft?: boolean;
+  currentStep?: number;
+  totalSteps?: number;
   className?: string;
 }
 
@@ -20,10 +25,15 @@ export function WizardFooter({
   onSaveDraft,
   previousLabel = 'Tillbaka',
   nextLabel = 'Nästa',
+  nextButtonText,
   canGoBack = true,
-  canGoNext = true,
-  isNextLoading = false,
+  canProceed = true,
+  isFirstStep = false,
+  isLastStep = false,
+  isSaving = false,
   showSaveDraft = true,
+  currentStep,
+  totalSteps,
   className = ''
 }: WizardFooterProps) {
   return (
@@ -34,7 +44,7 @@ export function WizardFooter({
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         {/* Left Side - Back Button */}
         <div className="flex items-center space-x-4">
-          {onPrevious && (
+          {onPrevious && !isFirstStep && (
             <button
               onClick={onPrevious}
               disabled={!canGoBack}
@@ -52,33 +62,41 @@ export function WizardFooter({
           {showSaveDraft && onSaveDraft && (
             <button
               onClick={onSaveDraft}
-              className="btn-ghost btn-sm flex items-center space-x-2 text-neutral-500 hover:text-brand"
+              disabled={isSaving}
+              className="btn-ghost btn-sm flex items-center space-x-2 text-neutral-500 hover:text-brand disabled:opacity-50"
             >
               <BookmarkIcon className="w-4 h-4" />
-              <span>Spara utkast</span>
+              <span>{isSaving ? 'Sparar...' : 'Spara utkast'}</span>
             </button>
           )}
         </div>
+
+        {/* Center - Step indicator for mobile */}
+        {currentStep && totalSteps && (
+          <div className="lg:hidden text-sm text-neutral-500">
+            {currentStep} av {totalSteps}
+          </div>
+        )}
 
         {/* Right Side - Next Button */}
         <div>
           {onNext && (
             <button
               onClick={onNext}
-              disabled={!canGoNext || isNextLoading}
+              disabled={!canProceed || isSaving}
               className={`
-                btn-primary btn-sm flex items-center space-x-2
-                ${!canGoNext || isNextLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                ${isLastStep ? 'btn-primary' : 'btn-primary'} btn-sm flex items-center space-x-2
+                ${!canProceed || isSaving ? 'opacity-50 cursor-not-allowed' : ''}
               `}
             >
-              {isNextLoading ? (
+              {isSaving ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Sparar...</span>
                 </>
               ) : (
                 <>
-                  <span>{nextLabel}</span>
+                  <span>{nextButtonText || nextLabel}</span>
                   <ArrowRightIcon className="w-4 h-4" />
                 </>
               )}

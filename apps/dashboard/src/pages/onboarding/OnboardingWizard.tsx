@@ -249,8 +249,8 @@ export function OnboardingWizard() {
         previousLabel="Tillbaka"
         nextLabel={currentStep === 2 ? "Gå till Dashboard" : "Nästa"}
         canGoBack={canGoBack}
-        canGoNext={canGoNext}
-        isNextLoading={isSaving}
+        canProceed={canGoNext}
+        isSaving={isSaving}
         showSaveDraft={true}
       />
     </div>

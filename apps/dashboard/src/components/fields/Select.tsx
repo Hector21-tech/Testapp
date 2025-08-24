@@ -11,12 +11,14 @@ export interface SelectOption {
 export interface SelectProps {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  onValueChange?: (value: string) => void;
   options: SelectOption[];
   placeholder?: string;
   required?: boolean;
   error?: string;
   hint?: string;
+  helperText?: string;
   icon?: React.ReactNode;
   disabled?: boolean;
   className?: string;
@@ -26,11 +28,13 @@ export function Select({
   label,
   value,
   onChange,
+  onValueChange,
   options,
   placeholder = 'Välj ett alternativ...',
   required = false,
   error,
   hint,
+  helperText,
   icon,
   disabled = false,
   className = ''
@@ -52,7 +56,7 @@ export function Select({
         <select
           id={selectId}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => (onChange || onValueChange)?.(e.target.value)}
           disabled={disabled}
           aria-invalid={!!error}
           aria-describedby={error ? `${selectId}-error` : hint ? `${selectId}-hint` : undefined}
@@ -94,9 +98,9 @@ export function Select({
         </p>
       )}
       
-      {hint && !error && (
+      {(hint || helperText) && !error && (
         <p id={`${selectId}-hint`} className="text-sm text-neutral-500">
-          {hint}
+          {hint || helperText}
         </p>
       )}
     </div>

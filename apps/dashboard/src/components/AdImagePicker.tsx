@@ -13,6 +13,9 @@ import type { AdImage } from '../features/campaign/types';
 interface AdImagePickerProps {
   selectedImage?: AdImage | null;
   onImageSelect: (image: AdImage) => void;
+  onImageClear?: () => void;
+  industryContext?: string;
+  companyName?: string;
   className?: string;
 }
 
@@ -38,7 +41,7 @@ const MOCK_STOCK_IMAGES: Omit<AdImage, 'isCustom'>[] = [
   }
 ];
 
-export function AdImagePicker({ selectedImage, onImageSelect, className = '' }: AdImagePickerProps) {
+export function AdImagePicker({ selectedImage, onImageSelect, onImageClear, industryContext, companyName, className = '' }: AdImagePickerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [previewModal, setPreviewModal] = useState<AdImage | null>(null);

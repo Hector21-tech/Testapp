@@ -144,7 +144,7 @@ export function ProfileWizard() {
               <RangeSlider
                 label="Arbetsradie"
                 value={profile.radius}
-                onChange={(value) => updateProfile({ radius: value })}
+                onChange={(value) => updateProfile({ radius: value as number })}
                 min={5}
                 max={100}
                 unit="km"
@@ -208,7 +208,7 @@ export function ProfileWizard() {
               <RangeSlider
                 label="Lägsta ålder"
                 value={profile.ageRangeMin}
-                onChange={(value) => updateProfile({ ageRangeMin: value })}
+                onChange={(value) => updateProfile({ ageRangeMin: value as number })}
                 min={18}
                 max={75}
                 unit="år"
@@ -217,7 +217,7 @@ export function ProfileWizard() {
               <RangeSlider
                 label="Högsta ålder"
                 value={profile.ageRangeMax}
-                onChange={(value) => updateProfile({ ageRangeMax: value })}
+                onChange={(value) => updateProfile({ ageRangeMax: value as number })}
                 min={profile.ageRangeMin + 1}
                 max={80}
                 unit="år"
@@ -358,8 +358,8 @@ export function ProfileWizard() {
         previousLabel="Tillbaka"
         nextLabel={profileSubStep === 8 ? "Slutför profil" : "Nästa"}
         canGoBack={canGoBack}
-        canGoNext={canGoNext}
-        isNextLoading={isSaving}
+        canProceed={canGoNext}
+        isSaving={isSaving}
         showSaveDraft={true}
       />
     </div>

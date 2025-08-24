@@ -12,15 +12,19 @@ export interface Step {
 
 export interface StepperProps {
   steps: Step[];
+  currentStep?: number;
   variant?: 'horizontal' | 'vertical';
   showProgress?: boolean;
+  onStepClick?: (stepIndex: number) => void;
   className?: string;
 }
 
 export function Stepper({ 
   steps, 
+  currentStep,
   variant = 'horizontal', 
   showProgress = true,
+  onStepClick,
   className = ''
 }: StepperProps) {
   const completedSteps = steps.filter(step => step.completed).length;
@@ -110,17 +114,20 @@ export function Stepper({
 
         {steps.map((step, index) => (
           <div key={step.id} className="flex flex-col items-center relative z-10">
-            <div className={`
-              w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 mb-2
-              ${step.completed 
-                ? 'bg-brand text-white shadow-soft scale-110' 
-                : step.current
-                  ? 'bg-brand text-white shadow-soft animate-pulse-soft'
-                  : step.disabled
-                    ? 'bg-neutral-200 text-neutral-400'
-                    : 'bg-white border-2 border-neutral-300 text-neutral-500 hover:border-brand hover:text-brand cursor-pointer'
-              }
-            `}>
+            <div 
+              className={`
+                w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 mb-2
+                ${step.completed 
+                  ? 'bg-brand text-white shadow-soft scale-110' 
+                  : step.current
+                    ? 'bg-brand text-white shadow-soft animate-pulse-soft'
+                    : step.disabled
+                      ? 'bg-neutral-200 text-neutral-400'
+                      : 'bg-white border-2 border-neutral-300 text-neutral-500 hover:border-brand hover:text-brand cursor-pointer'
+                }
+              `}
+              onClick={() => !step.disabled && onStepClick && onStepClick(index)}
+            >
               {step.completed ? (
                 <CheckIcon className="w-4 h-4 animate-bounce-soft" />
               ) : (
