@@ -1,5 +1,5 @@
 {
-  "name": "@annonshjälpen/api",
+  "name": "@annonshjalpen/api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -22,8 +22,8 @@
     "@prisma/client": "^5.5.0",
     "zod": "^3.22.0",
     "dotenv": "^16.3.0",
-    "@annonshjälpen/types": "workspace:*",
-    "@annonshjälpen/utils": "workspace:*"
+    "@annonshjalpen/types": "workspace:*",
+    "@annonshjalpen/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",

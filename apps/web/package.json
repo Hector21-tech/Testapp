@@ -1,5 +1,5 @@
 {
-  "name": "@annonshjälpen/web",
+  "name": "@annonshjalpen/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,9 +13,9 @@
     "next": "14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@annonshjälpen/ui": "workspace:*",
-    "@annonshjälpen/types": "workspace:*",
-    "@annonshjälpen/utils": "workspace:*"
+    "@annonshjalpen/ui": "workspace:*",
+    "@annonshjalpen/types": "workspace:*",
+    "@annonshjalpen/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",

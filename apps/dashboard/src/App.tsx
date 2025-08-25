@@ -10,6 +10,8 @@ import { DesignTestPage } from './pages/design-test/DesignTestPage';
 import { AITestPage } from './pages/ai-test/AITestPage';
 import { ContentStudioTestPage } from './pages/content-studio/ContentStudioTestPage';
 import { HelpPage } from './pages/help/HelpPage';
+import { FacebookTestPage } from './pages/facebook-test/FacebookTestPage';
+import { FacebookCallback } from './pages/facebook-test/FacebookCallback';
 
 function App() {
   return (
@@ -45,6 +47,12 @@ function App() {
           
           {/* Help Page */}
           <Route path="/help" element={<HelpPage />} />
+          
+          {/* Facebook Integration Test */}
+          <Route path="/facebook-test" element={<FacebookTestPage />} />
+          
+          {/* Facebook OAuth Callback */}
+          <Route path="/auth/facebook/callback" element={<FacebookCallback />} />
           
           {/* Legacy redirect for old wizard */}
           <Route path="/campaigns/studio" element={<Navigate to="/campaign-studio" replace />} />

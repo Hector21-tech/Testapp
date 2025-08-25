@@ -1,5 +1,5 @@
 {
-  "name": "@annonshjälpen/dashboard",
+  "name": "@annonshjalpen/dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,9 +10,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@annonshjälpen/types": "workspace:*",
-    "@annonshjälpen/ui": "workspace:*",
-    "@annonshjälpen/utils": "workspace:*",
+    "@annonshjalpen/types": "workspace:*",
+    "@annonshjalpen/ui": "workspace:*", 
+    "@annonshjalpen/utils": "workspace:*",
+    "@annonshjalpen/facebook-ads-connector": "workspace:*",
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "^5.0.0",
     "axios": "^1.5.0",

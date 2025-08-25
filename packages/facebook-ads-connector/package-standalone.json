@@ -1,0 +1,32 @@
+{
+  "name": "facebook-ads-connector-standalone",
+  "version": "1.0.0",
+  "description": "Facebook/Meta Ads API integration module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:manual": "npx ts-node --project tsconfig.test.json test/manual-test.ts",
+    "test:error": "npx ts-node --project tsconfig.test.json test/manual-test.ts --error-recovery",
+    "test:rate": "npx ts-node --project tsconfig.test.json test/manual-test.ts --rate-limiting",
+    "test:server": "node test/test-server.js"
+  },
+  "keywords": [
+    "facebook",
+    "meta",
+    "ads",
+    "marketing",
+    "api"
+  ],
+  "dependencies": {
+    "axios": "^1.6.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "typescript": "^5.0.0"
+  }
+}

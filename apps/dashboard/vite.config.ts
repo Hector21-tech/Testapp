@@ -13,6 +13,13 @@ export default defineConfig({
       '@/utils': path.resolve(__dirname, '../../packages/utils/src'),
     }
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+      },
+    },
+  },
   server: {
     port: 3001,
     open: true
