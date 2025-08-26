@@ -9,7 +9,7 @@ export const FacebookTestPage: React.FC = () => {
     
     // Generate Facebook OAuth URL
     const params = new URLSearchParams({
-      client_id: '1265970594722150',
+      client_id: '667138109089952',
       redirect_uri: `${window.location.origin}/auth/facebook/callback`,
       scope: 'public_profile',
       response_type: 'code',
@@ -45,8 +45,8 @@ export const FacebookTestPage: React.FC = () => {
             console.log('🔄 Exchanging code for access token...');
             const tokenResponse = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?` + 
               new URLSearchParams({
-                client_id: '1265970594722150',
-                client_secret: 'bd18a84e81bc4baad8fd8c1a98ac2849',
+                client_id: '667138109089952',
+                client_secret: 'e1950856689c62526056aa0e0522f017',
                 redirect_uri: `${window.location.origin}/auth/facebook/callback`,
                 code: event.data.code
               })
@@ -137,8 +137,8 @@ export const FacebookTestPage: React.FC = () => {
                   onClick={() => {
                     console.log('🧪 Simulating successful login');
                     setUser({
-                      id: '122138107718826827',
-                      name: 'Anton Axelsson'
+                      id: 'demo_user_12345',
+                      name: 'Demo User (Test Account)'
                     });
                   }}
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -168,8 +168,10 @@ export const FacebookTestPage: React.FC = () => {
 
           <div className="mt-8 pt-4 border-t border-gray-200 text-sm text-gray-600">
             <p><strong>Callback URL:</strong> {window.location.origin}/auth/facebook/callback</p>
-            <p><strong>App ID:</strong> 1265970594722150</p>
-            <p><strong>Scopes:</strong> public_profile</p>
+            <p><strong>App ID:</strong> 667138109089952</p>
+            <p><strong>Current Scopes:</strong> public_profile</p>
+            <p><strong>Requested Scopes:</strong> public_profile, ads_management, ads_read, business_management</p>
+            <p className="text-orange-600"><strong>Status:</strong> Pending App Review for Marketing API permissions</p>
           </div>
         </div>
       </div>

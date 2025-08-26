@@ -14,6 +14,6 @@ export const DEFAULT_CONFIG = {
 };
 
 export const FACEBOOK_CREDENTIALS = {
-  appId: '1265970594722150',
-  appSecret: 'bd18a84e81bc4baad8fd8c1a98ac2849'
+  appId: '667138109089952',
+  appSecret: 'e1950856689c62526056aa0e0522f017'
 };

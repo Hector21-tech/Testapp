@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnnonsHjälpen App Icon Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .icon-container {
+            margin: 20px;
+            text-align: center;
+        }
+        .icon {
+            width: 512px;
+            height: 512px;
+            border-radius: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin: 0 auto 20px;
+        }
+        .icon-1 {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+        }
+        .icon-2 {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+        }
+        .icon-3 {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+        }
+        .icon-text {
+            font-size: 72px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+        .icon-subtitle {
+            font-size: 28px;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-top: -8px;
+        }
+        .download-btn {
+            background: #1e40af;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .download-btn:hover {
+            background: #1d4ed8;
+        }
+        .instructions {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 AnnonsHjälpen App Icons</h1>
+    <p>Välj en design för din Facebook App ikon:</p>
+
+    <div class="icon-container">
+        <h3>Design 1: Blå Gradient (Facebook-stil)</h3>
+        <div class="icon icon-1" id="icon1">
+            <div>
+                <div class="icon-text">AH</div>
+                <div class="icon-subtitle">Annonser</div>
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadIcon('icon1', 'annonshjalpen-icon-blue.png')">
+            📥 Ladda ner PNG (1024x1024)
+        </button>
+    </div>
+
+    <div class="icon-container">
+        <h3>Design 2: Grön Gradient (Affärs-stil)</h3>
+        <div class="icon icon-2" id="icon2">
+            <div>
+                <div class="icon-text">AH</div>
+                <div class="icon-subtitle">Hjälpen</div>
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadIcon('icon2', 'annonshjalpen-icon-green.png')">
+            📥 Ladda ner PNG (1024x1024)
+        </button>
+    </div>
+
+    <div class="icon-container">
+        <h3>Design 3: Lila Gradient (Kreativ-stil)</h3>
+        <div class="icon icon-3" id="icon3">
+            <div>
+                <div class="icon-text">📊</div>
+                <div class="icon-subtitle">AnnonsH</div>
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadIcon('icon3', 'annonshjalpen-icon-purple.png')">
+            📥 Ladda ner PNG (1024x1024)
+        </button>
+    </div>
+
+    <canvas class="canvas" id="canvas" width="1024" height="1024"></canvas>
+
+    <div class="instructions">
+        <h2>📋 Instruktioner:</h2>
+        <ol>
+            <li><strong>Välj en design</strong> som du tycker passar AnnonsHjälpen bäst</li>
+            <li><strong>Klicka "Ladda ner PNG"</strong> för att få 1024x1024 bilden</li>
+            <li><strong>Gå till Facebook Developer Console</strong></li>
+            <li><strong>Settings → Basic → App Icon</strong></li>
+            <li><strong>Ladda upp den nedladdade PNG filen</strong></li>
+        </ol>
+        
+        <h3>🎯 Rekommendation:</h3>
+        <p><strong>Design 1 (Blå)</strong> passar bäst för Facebook App eftersom den matchar Facebooks färgschema och ser professionell ut.</p>
+        
+        <h3>📐 Tekniska specifikationer:</h3>
+        <ul>
+            <li>Storlek: 1024x1024 pixels</li>
+            <li>Format: PNG med transparent bakgrund</li>
+            <li>Kvalitet: Hög upplösning för alla skärmstorlekar</li>
+            <li>Style: Moderna gradients med clean typography</li>
+        </ul>
+    </div>
+
+    <script>
+        function downloadIcon(iconId, filename) {
+            const iconElement = document.getElementById(iconId);
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to 1024x1024
+            canvas.width = 1024;
+            canvas.height = 1024;
+            
+            // Get computed styles
+            const styles = window.getComputedStyle(iconElement);
+            const background = styles.background;
+            
+            // Create gradient
+            let gradient;
+            if (iconId === 'icon1') {
+                gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+                gradient.addColorStop(0, '#1e40af');
+                gradient.addColorStop(1, '#3b82f6');
+            } else if (iconId === 'icon2') {
+                gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+                gradient.addColorStop(0, '#059669');
+                gradient.addColorStop(1, '#10b981');
+            } else if (iconId === 'icon3') {
+                gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+                gradient.addColorStop(0, '#7c3aed');
+                gradient.addColorStop(1, '#a855f7');
+            }
+            
+            // Draw rounded rectangle background
+            const radius = 152; // Proportional to 76px at 512px
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 1024, 1024, radius);
+            ctx.fill();
+            
+            // Draw text
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Main text (AH or emoji)
+            const mainText = iconElement.querySelector('.icon-text').textContent;
+            ctx.font = 'bold 144px Arial, sans-serif';
+            ctx.fillText(mainText, 512, 450);
+            
+            // Subtitle
+            const subtitle = iconElement.querySelector('.icon-subtitle').textContent;
+            ctx.font = '300 56px Arial, sans-serif';
+            ctx.globalAlpha = 0.9;
+            ctx.fillText(subtitle, 512, 580);
+            ctx.globalAlpha = 1;
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Polyfill for roundRect if needed
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+            };
+        }
+    </script>
+</body>
+</html>

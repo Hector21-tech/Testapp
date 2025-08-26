@@ -12,6 +12,7 @@ import { ContentStudioTestPage } from './pages/content-studio/ContentStudioTestP
 import { HelpPage } from './pages/help/HelpPage';
 import { FacebookTestPage } from './pages/facebook-test/FacebookTestPage';
 import { FacebookCallback } from './pages/facebook-test/FacebookCallback';
+import { PrivacySettingsPage } from './pages/privacy/PrivacySettingsPage';
 
 function App() {
   return (
@@ -53,6 +54,9 @@ function App() {
           
           {/* Facebook OAuth Callback */}
           <Route path="/auth/facebook/callback" element={<FacebookCallback />} />
+          
+          {/* Privacy & Data Settings */}
+          <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
           
           {/* Legacy redirect for old wizard */}
           <Route path="/campaigns/studio" element={<Navigate to="/campaign-studio" replace />} />

@@ -227,7 +227,7 @@ export class CampaignHelpers {
     const adSet: Omit<AdSetData, 'campaign_id'> = {
       name: config.adSetName || `${config.campaignName} - Ad Set`,
       targeting,
-      optimization_goal: this.getOptimizationGoal(config.objective),
+      optimization_goal: this.getOptimizationGoal(config.objective) as any,
       billing_event: 'IMPRESSIONS',
       status: 'PAUSED'
     };
@@ -238,16 +238,16 @@ export class CampaignHelpers {
   /**
    * Get recommended optimization goal based on campaign objective
    */
-  private static getOptimizationGoal(objective: CampaignObjective): 'IMPRESSIONS' | 'CLICKS' | 'APP_INSTALLS' | 'REACH' | 'CONVERSIONS' | 'LINK_CLICKS' | 'POST_ENGAGEMENT' | 'LEAD_GENERATION' {
+  private static getOptimizationGoal(objective: CampaignObjective): 'IMPRESSIONS' | 'CLICKS' | 'APP_INSTALLS' | 'REACH' | 'CONVERSIONS' {
     const goalMap = {
       [CampaignObjective.AWARENESS]: 'REACH',
-      [CampaignObjective.TRAFFIC]: 'LINK_CLICKS',
-      [CampaignObjective.ENGAGEMENT]: 'POST_ENGAGEMENT',
-      [CampaignObjective.LEADS]: 'LEAD_GENERATION',
+      [CampaignObjective.TRAFFIC]: 'CLICKS',
+      [CampaignObjective.ENGAGEMENT]: 'IMPRESSIONS',
+      [CampaignObjective.LEADS]: 'CONVERSIONS',
       [CampaignObjective.APP_PROMOTION]: 'APP_INSTALLS',
       [CampaignObjective.SALES]: 'CONVERSIONS'
     };
 
-    return goalMap[objective] || 'REACH';
+    return (goalMap[objective] || 'REACH') as 'IMPRESSIONS' | 'CLICKS' | 'APP_INSTALLS' | 'REACH' | 'CONVERSIONS';
   }
 }
